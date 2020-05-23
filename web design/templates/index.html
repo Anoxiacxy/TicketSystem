@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{{ name }}'s Watchlist</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='semantic.min.css') }}" type="text/css">
+</head>
+<body>
+    <h2>{{ name }}'s Watchlist</h2>
+    <p>{{ movies|length }} Titles</p>
+    <div class="ui items">
+        {% for movie in movies%}
+        <div class="item">
+            <a class="ui tiny image">
+              <img src="https://semantic-ui.com/images/wireframe/image.png">
+            </a>
+            <div class="middle aligned content">
+              <div class="header"><i class="like icon"></i> {{ movie.title }} - {{ movie.year }} </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <footer>
+        <small>&copy; 2020 <a href="http://helloflask.com/tutorial">HelloFlask</a></small>
+    </footer>
+</body>
+
+</html>
