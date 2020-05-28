@@ -6,12 +6,15 @@
 #include <sys/socket.h> 
 #include <netinet/in.h> 
 #include <pthread.h> 
+#include "../backend/interpreter.hpp"
 
 #define MAXBUFF 4096
 
+template<class Communicate>
 class Server {
 private:
     int  server_sockfd;
+    Interpret inpterpret;
 public:
     Server(int MYPORT = 12306, int QUEUESIZE = 10) {
         server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
@@ -28,11 +31,6 @@ public:
     ~Server() {
         close(server_sockfd);
     }
-    void getBackendOutput(char * buff) {
-        
-        scanf("%s", buff);
-        printf("\n");
-    }
     run_once() {
         int client_sockfd;
         struct sockadd_in client_sockaddr;
@@ -47,7 +45,7 @@ public:
             int n = recv(client_sockfd, buff, MAXBUFF, 0);
             buff[n] = '\0';
             printf("recv msg from client <<< %s\n", buff);
-            getBackendOutput(buff);
+            communicate(buff);
             printf("send msg to client >>> %s\n", buff);
             send(client_sockfd, buff, strlen(buff), 0);
             close_flag = true;    
@@ -62,6 +60,6 @@ public:
 
 
 int main(int argc, char** argv){
-    
+    Server server()
     return 0;
 }

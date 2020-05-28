@@ -48,7 +48,7 @@ namespace sjtu{
 		string<5> arriving_time;
 		string<5> leaving_time;
 		int station_num;
-		int price;//���׷�վ�����Ʊ�� 
+		int price;//ļæ½ļæ½ļæ½×·ļæ½Õ¾ļæ½ļæ½ļæ½ļæ½ļæ½Ę±ļæ½ļæ½ 
 	};
 } 
 
