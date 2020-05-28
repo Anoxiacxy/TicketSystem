@@ -1,4 +1,5 @@
 from flask import Flask, url_for, render_template, request, redirect
+from client import Client
 
 app = Flask(__name__) 
 
