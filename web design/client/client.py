@@ -7,9 +7,10 @@ class Client:
         self.ADDRESS = (self.HOST, self.PORT)
         self.MAXBUFF = MAXBUFF
 
-    def conmunnicate(self, data):
+    def communicate(self, data):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect(self.ADDRESS)
             s.sendall(data.encode())
             data = s.recv(self.MAXBUFF).decode()
         return data
+
