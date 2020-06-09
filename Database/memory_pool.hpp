@@ -11,7 +11,9 @@ using ull = unsigned long long;
 
 const ull hash_seed = 233;
 
-const size_t bitsize = (1 << 12);
+const size_t bitsize = 8192;
+
+extern bool cleaned;
 
 struct FILE_KEY {
 	char *filename;
@@ -57,7 +59,7 @@ struct unit {
 	FILE_KEY key;
 
 	unit(FILE_KEY _key, unit *_next, unit *_qnext) :
-		key(_key), next(_next), prev(nullptr), qnext(_qnext), qprev(_qprev)
+		key(_key), next(_next), prev(nullptr), qnext(_qnext), qprev(nullptr)
 	{
 		FILE *f = fopen(_key.filename, "rb+");
 		if (!f) f = fopen(_key.filename, "wb+");
@@ -69,7 +71,7 @@ struct unit {
 	void release() {
 		FILE *f = fopen(key.filename, "rb+");
 		if (!f) f = fopen(key.filename, "wb+");
-		fseek(f, _key.pos * bitsize, SEEK_SET);
+		fseek(f, key.pos * bitsize, SEEK_SET);
 		fwrite(mem, 1, bitsize, f);
 		fflush(f);
 		fclose(f);
@@ -169,7 +171,7 @@ buffer_pool mem_pool;
 void buffer_read(void *value, size_t pos, size_t size, const char *filename) {
 	if (cleaned) return;
 	size_t block_l = pos / bitsize, block_r = (pos + size - 1) / bitsize, index = 0;
-	pos %= block_l;
+	pos %= bitsize;
 	for (size_t i = block_l; i <= block_r; ++i) {
 		int len = size > bitsize - pos ? bitsize - pos : size;
 		unit *now = mem_pool.insert(FILE_KEY(filename, i));
@@ -183,7 +185,7 @@ void buffer_read(void *value, size_t pos, size_t size, const char *filename) {
 void buffer_write(const void *value, size_t pos, size_t size, const char *filename) {
 	if (cleaned) return;
 	size_t block_l = pos / bitsize, block_r = (pos + size - 1) / bitsize, index = 0;
-	pos %= block_l;
+	pos %= bitsize;
 	for (size_t i = block_l; i <= block_r; ++i) {
 		int len = size > bitsize - pos ? bitsize - pos : size;
 		unit *now = mem_pool.insert(FILE_KEY(filename, i));

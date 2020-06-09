@@ -5,13 +5,16 @@
 #include "find_blank.hpp"
 #include "exceptions.hpp"
 #include "utility.hpp"
+#include "memory_pool.hpp"
 
 #ifndef __B_PLUS_TREE__
 #define __B_PLUS_TREE__
 
-namespace sjtu {
+namespace sjtu
+{
 	template <class Key, class value_t, size_t K = 4096, class Compare = std::less<Key>>
-	class bptree {
+	class bptree
+	{
 		typedef char* buffer_pointer;
 		typedef char buffer[K];
 
@@ -24,28 +27,32 @@ namespace sjtu {
 
 		Compare comparing = Compare();
 
-		bool equal_key(const Key &a, const Key &b) const {
+		bool equal_key(const Key &a, const Key &b) const
+		{
 			return !comparing(a, b) && !comparing(b, a);
 		}
 
-		struct node {
+		struct node
+		{
 			Key key;
 			off_t prev, next, pos;
 			size_t size;
 
 			bool is_leaf;
 
-			node(off_t __pos, off_t __prev = invalid_off, __next = invalid_off, bool __is_leaf = true) :
+			node(off_t __pos, off_t __prev = invalid_off, off_t __next = invalid_off, bool __is_leaf = true) :
 				pos(__pos), prev(__prev), next(__next), is_leaf(__is_leaf), size(0)
 			{
 				key = Key();
 			} // for leaf node
 
-			node(off_t __pos, bool __is_leaf = false) : pos(__pos), is_leaf(__is_leaf) {
+			node(off_t __pos, bool __is_leaf = false) : pos(__pos), is_leaf(__is_leaf)
+			{
 				key = Key();
 			} // for inner node
 
-			node(const node &other) {
+			node(const node &other)
+			{
 				key = other.key;
 				prev = other.prev;
 				next = other.next;
@@ -55,21 +62,25 @@ namespace sjtu {
 			} // for copy a node
 		};
 	private:
-		void save_node(const node &x) {
+		void save_node(const node &x)
+		{
 			buffer_write(&x, x.pos, sizeof(node), filename);
 		}
 
-		void delete_node(const node &x) {
+		void delete_node(const node &x)
+		{
 			finder.m_delete(x);
 		}
 
-		void save_info() {
+		void save_info()
+		{
 			buffer_write(&head, 0, sizeof(off_t), filename);
 			buffer_write(&tail, sizeof(off_t), sizeof(off_t), filename);
 			buffer_write(&root, 2 * sizeof(off_t), sizeof(off_t), filename);
 		}
 
-		void init() {
+		void init()
+		{
 			head = tail = root = invalid_off;
 			save_info();
 			finder.save_info();
@@ -77,7 +88,8 @@ namespace sjtu {
 
 		//--------------transfer information between buffer and node------------------------
 
-		void buffer_load_node(buffer_pointer b, const node &x) const {
+		void buffer_load_node(buffer_pointer b, const node &x) const
+		{
 			if (x.size == 0) return;
 			buffer_read(b, x.pos + sizeof(node), x.size * (sizeof(off_t) + sizeof(Key)), filename);
 		}
@@ -199,7 +211,7 @@ namespace sjtu {
 			++x.size;
 			save_node(x);
 			if (x.size > node_size) {
-				node y = split_node(x);
+				node y = split_node(b, x);
 				return y;
 			} else {
 				buffer_save_node(b, x);
@@ -218,12 +230,12 @@ namespace sjtu {
 			adjust_leaf(b, x, t);
 			*get_leaf_key(b, t) = key;
 			*get_leaf_value(b, t) = value;
-			x.key = get_leaf_key(b, 0);
+			x.key = *get_leaf_key(b, 0);
 			++x.size;
 			save_node(x);
 			is_change = false;
 			if (x.size > leaf_size) {
-				node y = split_leaf(x);
+				node y = split_leaf(b, x);
 				return y;
 			} else {
 				buffer_save_leaf(b, x);
@@ -244,7 +256,7 @@ namespace sjtu {
 				if (!equal_key(key, *get_node_key(b, pos)) && pos > 0) --pos;
 				if (pos == x.size) --pos;
 				off_t pre_son = *get_node_son(b, pos);
-				pre_son_node = get_node(pre_son);
+				node pre_son_node = get_node(pre_son);
 				node new_node = insert(pre_son_node, key, value, is_change);
 				if (is_change) return x;
 				if (new_node.pos != pre_son_node.pos) {
@@ -589,7 +601,7 @@ namespace sjtu {
 				if (!equal_key(key, *get_node_key(b, tx)) && tx > 0) --tx;
 				node x_son = get_node(*get_node_son(b, tx));
 				pair<int, Key> tmp = erase(x_son, key, x);
-				swith (tmp.first) {
+				switch (tmp.first) {
 					case -1: {
 						*get_node_key(b, tx) = x_son.key;
 						*get_node_key(b, tx + 1) = tmp.second;
@@ -658,13 +670,20 @@ namespace sjtu {
 		bptree(const char *fname, const char *in_file) : 
 			leaf_size((K - sizeof(node)) / (sizeof(Key) + sizeof(value_t)) - 1),
 			node_size((K - sizeof(node)) / (sizeof(Key) + sizeof(value_t)) - 1)
+			// leaf_size(50), node_size(50)
 		{
+			// std::cerr << "fucking" << std::endl;
 			filename = new char[strlen(fname) + 1];
 			strcpy(filename, fname);
 			index_file = new char[strlen(in_file) + 1];
 			strcpy(index_file, in_file);
+
+			// std::cerr << "fucking" << std::endl;
 			finder.init(in_file);
+			
+			// std::cerr << "fucking" << std::endl;
 			FILE *file = fopen(filename, "rb+");
+			// std::cerr << "fucking" << std::endl;
 			if (!file) init();
 			else {
 				fclose(file);
@@ -705,8 +724,8 @@ namespace sjtu {
 				tree = _tree;
 			}
 
-			iterator(const iterator &other) : leaf(_leaf), pos(_pos) {
-				tree = _tree;
+			iterator(const iterator &other) : leaf(other.leaf), pos(other.pos) {
+				tree = other.tree;
 			}
 
 			operator const_iterator() {
@@ -802,12 +821,12 @@ namespace sjtu {
 				tree = _tree;
 			}
 
-			const_iterator(const iterator &other) : leaf(_leaf), pos(_pos) {
-				tree = _tree;
+			const_iterator(const iterator &other) : leaf(other.leaf), pos(other.pos) {
+				tree = other.tree;
 			}
 
-			const_iterator(const const_iterator &other) : leaf(_leaf), pos(_pos) {
-				tree = _tree;
+			const_iterator(const const_iterator &other) : leaf(other.leaf), pos(other.pos) {
+				tree = other.tree;
 			}
 
 			operator iterator() {
@@ -957,8 +976,8 @@ namespace sjtu {
 				*get_node_key(b, 1) = result.key;
 				*get_node_son(b, 1) = result.pos;
 				new_root.size = 2;
-				save_node(new_node);
-				buffer_save_node(b, new_node);
+				save_node(new_root);
+				buffer_save_node(b, new_root);
 				save_info();
 				return;
 			} else {
@@ -1115,8 +1134,8 @@ namespace sjtu {
 				*get_node_key(b, 1) = result.key;
 				*get_node_son(b, 1) = result.pos;
 				new_root.size = 2;
-				save_node(new_node);
-				buffer_save_node(b, new_node);
+				save_node(new_root);
+				buffer_save_node(b, new_root);
 				save_info();
 				return is_change;
 			} else {

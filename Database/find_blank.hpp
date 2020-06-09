@@ -1,5 +1,6 @@
 #include <iostream>
-#include "exception.hpp"
+#include "memory_pool.hpp"
+#include "exceptions.hpp"
 
 const off_t invalid_off = 0xdeadbeef;
 
@@ -36,15 +37,22 @@ public:
 		index_file = new char[strlen(in_file) + 1];
 		strcpy(index_file, in_file);
 		FILE *file = fopen(index_file, "rb+");
+		// std::cerr << "fucking" << std::endl;
 		if (!file) {
 			num = 0;
 			size = 3 * sizeof(off_t);
 			blank = nullptr;
+
+			// std::cerr << "fucking" << std::endl;
 			save_info();
+			// std::cerr << "fucking" << std::endl;
 		}
 		else {
 			fclose(file);
+			
+			// std::cerr << "fucking" << std::endl;
 			save_info();
+			// std::cerr << "fucking" << std::endl;
 		}
 	}
 
