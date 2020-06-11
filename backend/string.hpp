@@ -20,6 +20,10 @@ namespace sjtu{
 				str.push_back(STR[i]);
 			}
 		}
+		string(int a){
+			int Length = 1;
+			str.push_back(a +'0');
+		}
 		template <int other_length>
 		string(const string<other_length> &other){
 			for(int i = 0; i < other.size(); ++i){
@@ -49,7 +53,7 @@ namespace sjtu{
 			else return 1;
 		}
 		template <int other_length>
-		bool operator == (const string<other_length> &other){
+		bool operator == (const string<other_length> &other) const{
 			if(size() != other.size()) return false;
 			for(int i = 0; i < size(); ++i){
 				if((*this)[i] != other[i]) return false;
@@ -57,16 +61,29 @@ namespace sjtu{
 			return true;
 		}
 		template <int other_length>
-		bool operator < (const string<other_length> &other){
-			if(size() < other.size()) return true;
-			else if(size() > other.size()) return false;
-			else{
-				for(int i = 0; i < size(); ++i){
-				    if((*this)[i] < other[i]) return true;
-				    if((*this)[i] > other[i]) return false;
-			    }
-			    return false;
+		bool operator != (const string<other_length> &other) const{
+			return !((*this) == other);
+		}
+		template <int other_length>
+		bool operator < (const string<other_length> &other) const{
+			for(int i = 0; i < std::min(size(), other.size()); ++i){
+				if((*this)[i] < other[i]) return true;
+				else if((*this)[i] > other[i]) return false;
 			}
+			if(size() < other.size()) return true;
+			else return false;
+		}
+		template <int other_length>
+		bool operator > (const string<other_length> &other) const{
+			return !((*this) < other || (*this) == other);
+		}
+		template <int other_length>
+		bool operator <= (const string<other_length> &other) const{
+			return !((*this) > other);
+		}
+		template <int other_length>
+		bool operator >= (const string<other_length> &other) const{
+			return !((*this) < other);
 		}
 	};
 	template <int length>

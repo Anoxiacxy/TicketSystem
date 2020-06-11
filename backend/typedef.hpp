@@ -9,6 +9,12 @@ namespace sjtu{
 	typedef string<30> MAILADDR;
 	typedef int PRIVILEGE;
 	
+	const USERNAME invalid_username("invalid");
+	const PASSWORD invalid_password("invalid");
+	const NAME invalid_name("invalid");
+	const MAILADDR invalid_mailAddr("invalid");
+	const PRIVILEGE invalid_privilege = -1;
+	
 	typedef string<20> TRAINID;
 	typedef int STATIONNUM;
 	typedef string<20> STATIONS;

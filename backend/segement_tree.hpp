@@ -6,11 +6,14 @@
 #include <cstddef>
 #include <new>
 namespace sjtu{
-	template<int Size>
+//	template<int Size>
 	class segement_tree{
 	private:
-		int tag[Size << 2];
-		int Min[Size << 2];
+//		int tag[Size << 2];
+//		int Min[Size << 2];
+        int Size = 0;
+		int *tag;
+		int *Min; 
 		inline int ls(int x){return x << 1;}
 		inline int rs(int x){return x << 1 | 1;} 
 		inline void push_up(int p){Min[p] = std::min(Min[ls(p)], Min[rs(p)]);}
@@ -25,27 +28,42 @@ namespace sjtu{
 		}
 	public:
 		segement_tree() = default;
-		segement_tree(const segement_tree &other){
-			memcpy(tag, other.tag, sizeof(int)*4*Size);
-			memcpy(Min, other.Min, sizeof(int)*4*Size);
+		segement_tree(int size):Size(size){
+			tag = new int[Size << 2];
+			Min = new int[Size << 2];
+		};
+		segement_tree(const segement_tree &other):Size(other.Size){
+			if(Size != 0){
+				tag = new int[Size << 2];
+			    Min = new int[Size << 2];
+			    memcpy(tag, other.tag, sizeof(int)*4*Size);
+			    memcpy(Min, other.Min, sizeof(int)*4*Size);
+			}
 		}
-		segement_tree(int initial_data[Size]){
-			build(1, 1, Size, initial_data[Size]);
+		segement_tree(int initial_data[], int size):Size(size){
+			tag = new int[Size << 2];
+			Min = new int[Size << 2];
+			build(1, 1, Size, initial_data);
 		}
-		~segement_tree(){};
+		~segement_tree(){
+			if(Size != 0){
+			    delete [] tag;
+			    delete [] Min;
+		    }
+		};
 		segement_tree &operator = (const segement_tree &other){
 			new(this)segement_tree(other);
 			return *this;
 		}
-		void build(int p, int l, int r,int initial_data[Size]){
+		void build(int p, int l, int r,int initial_data[]){
 			tag[p] = 0;
 			if(l == r){
 			    Min[p] = initial_data[l];
 				return;	
 			}
 			int mid = (l + r) >> 1;
-			build(ls(p), l, mid, initial_data[Size]);
-			build(rs(p), mid + 1, r, initial_data[Size]);
+			build(ls(p), l, mid, initial_data);
+			build(rs(p), mid + 1, r, initial_data);
 			push_up(p);
 		}
 		inline void update(int L, int R, int l, int r, int p, int val){
@@ -70,6 +88,15 @@ namespace sjtu{
 			else{
 				return std::min(query(L, R, l, mid, ls(p)), query(L, R, mid + 1, r, rs(p)));
 			}
+		}
+		inline int query(int num, int l, int r, int p){
+			if(l == r){
+				return Min[p];
+			}
+			push_down(p);
+			int mid = (l + r) >> 1;
+			if(num <= mid) return query(num, l, mid, ls(p));
+			else if(num > mid) return query(num, mid + 1, r, rs(p));
 		}
 	};
 }

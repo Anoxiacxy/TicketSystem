@@ -271,7 +271,13 @@ public:
 	 * assigns specified element with bounds checking
 	 * throw index_out_of_bound if pos is not in [0, size)
 	 */
-
+	bool operator == (const vector &other){
+		if(currentsize != other.currentsize) return false;
+		for(int i = 0; i < currentsize; ++i){
+			if((*this)[i] != other[i]) return false;
+		}
+		return true;
+	}
 	T & at(const size_t &pos) {
 		if(pos < 0 || pos > currentsize) throw index_out_of_bound();
 		return data[pos];

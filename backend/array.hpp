@@ -2,6 +2,7 @@
 #define SJTU_ARRAY_HPP
 
 #include "exceptions.hpp"
+#include "utility.hpp"
 #include <climits>
 #include <cstddef>
 #include <new>
