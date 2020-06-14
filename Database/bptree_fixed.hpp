@@ -161,7 +161,7 @@ namespace sjtu
 		}
 
 		void adjust_leaf(buffer_pointer b, node &x, size_t t) {
-			for (size_t i = x.size; i > t; --t) {
+			for (size_t i = x.size; i > t; --i) {
 				*get_leaf_key(b, i) = *get_leaf_key(b, i - 1);
 				*get_leaf_value(b, i) = *get_leaf_value(b, i - 1);
 			}
