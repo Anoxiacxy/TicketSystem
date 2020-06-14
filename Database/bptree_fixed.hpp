@@ -69,7 +69,7 @@ namespace sjtu
 
 		void delete_node(const node &x)
 		{
-			finder.m_delete(x);
+			finder.m_delete(x.pos);
 		}
 
 		void save_info()
@@ -316,7 +316,7 @@ namespace sjtu
 			}
 			delete_node(x);
 			save_node(y);
-			buffer_save_node(y);
+			buffer_save_node(by, y);
 		}
 
 		void merge_right_leaf(buffer_pointer bx, node &x, node &y) {
@@ -335,7 +335,7 @@ namespace sjtu
 			}
 			delete_node(y);
 			save_node(x);
-			buffer_save_node(x);
+			buffer_save_node(bx, x);
 		}
 
 		void buffer_erase_node(buffer_pointer b, node &x, Key key) {
@@ -606,7 +606,7 @@ namespace sjtu
 						*get_node_key(b, tx) = x_son.key;
 						*get_node_key(b, tx + 1) = tmp.second;
 						if (!tx) x.key = x_son.key;
-						save_node(b, x);
+						save_node(x);
 						buffer_save_node(b, x);
 						break;
 					}
