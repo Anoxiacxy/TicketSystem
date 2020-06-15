@@ -351,7 +351,7 @@ namespace sjtu
 
 		void buffer_erase_leaf(buffer_pointer b, node &x, Key key) {
 			size_t t = find_leaf_pos(b, key, x.size);
-			if (!(t < x.size && equal_key(key, *get_node_key(b, t)))) throw "erase leaf error!";
+			if (!(t < x.size && equal_key(key, *get_leaf_key(b, t)))) throw "erase leaf error!";
 			for (size_t i = t; i < x.size - 1; ++i) {
 				*get_leaf_value(b, i) = *get_leaf_value(b, i + 1);
 				*get_leaf_key(b, i) = *get_leaf_key(b, i + 1);
