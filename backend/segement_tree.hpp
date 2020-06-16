@@ -6,11 +6,8 @@
 #include <cstddef>
 #include <new>
 namespace sjtu{
-//	template<int Size>
 	class segement_tree{
 	private:
-//		int tag[Size << 2];
-//		int Min[Size << 2];
         int Size = 0;
 		int *tag;
 		int *Min; 
@@ -76,6 +73,7 @@ namespace sjtu{
 			int mid = (l + r) >> 1;
 			if(L <= mid) update(L, R, l, mid, ls(p), val);
 			if(R > mid) update(L, R, mid + 1, r, rs(p), val);
+			push_up(p);
 		}
 		inline int query(int L, int R, int l, int r, int p){
 			if(L <= l && R >= r){
@@ -83,11 +81,9 @@ namespace sjtu{
 			}
 			push_down(p);
 			int mid = (l + r) >> 1;
-			if(r <= mid) return query(L, R, l, mid, ls(p));
-			else if(l > mid) return query(L, R, mid + 1, r, rs(p));
-			else{
-				return std::min(query(L, R, l, mid, ls(p)), query(L, R, mid + 1, r, rs(p)));
-			}
+			if(R <= mid) return query(L, R, l, mid, ls(p));
+			else if(L > mid) return query(L, R, mid + 1, r, rs(p));
+            else return std::min(query(L, R, l, mid, ls(p)), query(L, R, mid + 1, r, rs(p)));
 		}
 		inline int query(int num, int l, int r, int p){
 			if(l == r){

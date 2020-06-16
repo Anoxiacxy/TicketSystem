@@ -13,7 +13,7 @@ const ull hash_seed = 233;
 
 const size_t bitsize = 8192;
 
-extern bool cleaned;
+bool cleaned = false;
 
 struct FILE_KEY {
 	char *filename;

@@ -35,7 +35,7 @@ class Interpreter{
     	    	string<10> name;
     	    	string<30> mailAddr;
     	    	int privilege;
-    	    	while(infile.get() != '\n'){
+    	    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-c")){
@@ -67,7 +67,7 @@ class Interpreter{
 		    else if(tmp == string<10>("login")){
 		    	string<20> username;
     	    	string<30> password;
-    	    	while(infile.get() != '\n'){
+    	    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
 					if(op == string<3>("-u")){
@@ -81,7 +81,7 @@ class Interpreter{
 		    }
 		    else if(tmp == string<10>("logout")){
 		    	string<20> username;
-    	    	while(infile.get() != '\n'){
+    	    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
 					if(op == string<3>("-u")){
@@ -93,7 +93,7 @@ class Interpreter{
 		    else if(tmp == string<15>("query_profile")){
 		    	string<20> username1;
     	    	string<20> username2;
-    	    	while(infile.get() != '\n'){
+    	    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-c")){
@@ -116,7 +116,7 @@ class Interpreter{
     	    	string<10> name = invalid_name;
     	    	string<30> mailAddr = invalid_mailAddr;
     	    	int privilege = invalid_privilege;
-    	    	while(infile.get() != '\n'){
+    	    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-c")){
@@ -148,7 +148,7 @@ class Interpreter{
 		    	string<20> trainID;
 		    	int stationNum;
 		    	int seatNum;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-i")){
@@ -170,13 +170,14 @@ class Interpreter{
 		    	string<5> saleDate_from;
 		    	string<5> saleDate_to;
 		    	char type;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-s")){
+    	    			infile.get();
     	    			for(int i = 0; i < stationNum - 1; ++i){
-    	    				char Tmp[20];
-    	    				infile.getline(Tmp, 20, '|');
+    	    				char Tmp[21];
+    	    				infile.getline(Tmp, 21, '|');
     	    				stations[i] = string<20>(Tmp);
 						}
 						infile >> stations[stationNum - 1];
@@ -210,17 +211,20 @@ class Interpreter{
 						stopoverTimes[stationNum - 1] = -1;
 					}
 					else if(op == string<3>("-d")){
-						infile >> saleDate_from;
+						char Tmp[6];
 						infile.get();
+    	    			infile.getline(Tmp, 6, '|');
+						saleDate_from = string<5>(Tmp);
 						infile >> saleDate_to;
 					}
 					else if(op == string<3>("-y")){
+						infile.get();
 						infile >> type;
 					}
 				}
 				int tmp = T.add_train(trainID, stationNum, stations, prices, startTime, travelTimes, stopoverTimes, saleDate_from, saleDate_to, type, seatNum);
 				std::cout << tmp << std::endl;
-				if(tmp == -1) continue;
+			/*	if(tmp == -1) continue;
 				else{
 					int date_gap = 0;
 					int date_fix = 0;
@@ -239,23 +243,30 @@ class Interpreter{
 					        leaving_time = tmpTime2.second;
 						}
 				    }
-				}
-		    }
+				} */
+		    } 
 		    else if(tmp == string<15>("release_train")){
 		    	string<20> trainID;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-i")){
     	    			infile >> trainID;
 					}
 				}
-				std::cout << T.release_train(trainID) << std::endl;
+				std::cout << "WWW" << std::endl;
+				int data = T.release_train(trainID);
+				std::cout << data << std::endl;
+				if(data == 0){
+					train tmp = T.at(trainID);
+					TT.add(tmp, trainID);
+				}
+				std::cout << data << std::endl;
 		    }
 		    else if(tmp == string<15>("query_train")){
 		    	string<20> trainID;
 		    	string<5> date;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-i")){
@@ -277,7 +288,7 @@ class Interpreter{
 		    }
 		    else if(tmp == string<15>("delete_train")){
 		    	string<20> trainID;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-i")){
@@ -291,7 +302,7 @@ class Interpreter{
 		    	string<20> station1;
 		    	string<20> station2;
 		    	string<5> cmp;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-d")){
@@ -317,14 +328,15 @@ class Interpreter{
 						bool flag = T.release(ans.get_trainID());
 						if(flag){
 							ans.print();
-						    int seat = T.query_seat(ans.get_trainID(), ans.get_start_date(), ans.get_num1(), ans.get_num2());
+						    int seat = T.query_seat(ans.get_trainID(), ans.get_start_date(), ans.get_num1(), ans.get_num2()); 
 						    std::cout << seat << std::endl;
 						}
 					}
 				}
-				else if(cmp == string<5>("price")){
+				else if(cmp == string<5>("cost")){
 					priority_queue<ticket_train, cmp_price> res = TT.query_ticket_price(station1, station2, date);
 					int num = res.size();
+					std::cout << num << std::endl;
 					for(int i = 0; i < num; ++i){
 						ticket_train ans = res.top();
 						res.pop();
@@ -342,7 +354,7 @@ class Interpreter{
 		    	string<20> station1;
 		    	string<20> station2;
 		    	string<5> cmp;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-d")){
@@ -359,10 +371,31 @@ class Interpreter{
 					}
 				}
 				if(cmp == string<5>("time")){
+					pair<ticket_train, ticket_train> ans = TT.query_transfer_time(station1, station2, date, T); 
+					if (ans.first == ticket_train()){
+						std::cout << 0 << std::endl;
+						continue;
+					}
+					ans.first.print();
+					int seat1 = T.query_seat(ans.first.get_trainID(), ans.first.get_start_date(), ans.first.get_num1(), ans.first.get_num2());
+					std::cout << seat1 << std::endl;
+					ans.second.print();
+					int seat2 = T.query_seat(ans.second.get_trainID(), ans.second.get_start_date(), ans.second.get_num1(), ans.second.get_num2());
+					std::cout << seat2 << std::endl;
 				}
-				else if(cmp == string<5>("price")){
-					
-				}
+				else if(cmp == string<5>("cost")){
+					pair<ticket_train, ticket_train> ans = TT.query_transfer_price(station1, station2, date, T); 
+					if (ans.first == ticket_train()){
+						std::cout << 0 << std::endl;
+						continue;
+					}
+					ans.first.print();
+					int seat1 = T.query_seat(ans.first.get_trainID(), ans.first.get_start_date(), ans.first.get_num1(), ans.first.get_num2());
+					std::cout << seat1 << std::endl;
+					ans.second.print();
+					int seat2 = T.query_seat(ans.second.get_trainID(), ans.second.get_start_date(), ans.second.get_num1(), ans.second.get_num2());
+					std::cout << seat2 << std::endl;
+				} 
 		    }
 		    else if(tmp == string<15>("buy_ticket")){
 		    	string<20> username;
@@ -371,8 +404,8 @@ class Interpreter{
 		    	string<20> leaving_station;
 		    	string<20> arriving_station;
 		    	int ticketNum;
-		    	bool queue = false;
-		    	while(infile.get() != '\n'){
+		    	string<5> queue("false");
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-u")){
@@ -403,10 +436,10 @@ class Interpreter{
 					pair<int, route> tmpdata = T.query_ticket(trainID, date, leaving_station, arriving_station, ticketNum);
 					int flag = tmpdata.first;
 					if(flag == -1) std::cout << -1 << std::endl;
-					else if(flag == 0 && queue == false) std::cout << -1 << std::endl;
-					else if(flag == 0 && queue == true){
-						TUT.add_ticket(username, trainID, date, leaving_station, arriving_station, ticketNum, tmpdata.second.leaving_time, tmpdata.second.arriving_time, tmpdata.second.date_fix, tmpdata.second.date_gap, string<8>("queue"), tmpdata.second.price, tmpdata.second.leaving_station, tmpdata.second.arriving_station);
-						TUT.add_queue(username, trainID, date, leaving_station, arriving_station, ticketNum, tmpdata.second.leaving_time, tmpdata.second.arriving_time, tmpdata.second.date_fix, tmpdata.second.date_gap, string<8>("queue"), tmpdata.second.price, tmpdata.second.leaving_station, tmpdata.second.arriving_station);
+					else if(flag == 0 && queue == string<5>("false")) std::cout << -1 << std::endl;
+					else if(flag == 0 && queue == string<5>("true")){
+						int data = TUT.add_ticket(username, trainID, date, leaving_station, arriving_station, ticketNum, tmpdata.second.leaving_time, tmpdata.second.arriving_time, tmpdata.second.date_fix, tmpdata.second.date_gap, string<8>("pending"), tmpdata.second.price, tmpdata.second.leaving_station, tmpdata.second.arriving_station);
+						TUT.add_queue(username, data, trainID, date, leaving_station, arriving_station, ticketNum, tmpdata.second.leaving_time, tmpdata.second.arriving_time, tmpdata.second.date_fix, tmpdata.second.date_gap, string<8>("pending"), tmpdata.second.price, tmpdata.second.leaving_station, tmpdata.second.arriving_station);
 						std::cout << "queue" << std::endl;
 					}
 					else if(flag == 1){
@@ -417,19 +450,23 @@ class Interpreter{
 		    }
 		    else if(tmp == string<15>("query_order")){
 		    	string<20> username;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-u")){
     	    			infile >> username;
 					}
 				}
-				std::cout << TUT.query_order(username) << std::endl;
+				bool log = U.query_log(username);
+				if(!log) std::cout << -1 << std::endl;
+				else{
+					TUT.query_order(username);
+				}
 		    }
 		    else if(tmp == string<15>("refund_ticket")){
 		    	string<20> username;
 		    	int n = 1;
-		    	while(infile.get() != '\n'){
+		    	while(infile.get() != 10){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-u")){
@@ -439,8 +476,12 @@ class Interpreter{
 						infile >> n;
 					}
 				}
-		    	int op = TUT.refund_ticket(username, n, T);
-		    	std::cout << op << std::endl;
+				bool log = U.query_log(username);
+				if(!log) std::cout << -1 << std::endl;
+				else{
+				    int op = TUT.refund_ticket(username, n, T);
+		    	    std::cout << op << std::endl;	
+				}
 		    }
 		    else if(tmp == string<10>("clean")){
 		    	U.~user_related();

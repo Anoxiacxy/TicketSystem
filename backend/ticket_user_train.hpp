@@ -3,7 +3,26 @@
 
 #include "string.hpp"
 #include "train.hpp"
+#include "typedef.hpp"
 namespace sjtu{
+	class user_order{
+	public:
+		int order;
+		USERNAME username;
+	public:
+		user_order() = default;
+		user_order(int O, const USERNAME &U):order(O), username(U){}
+		user_order(const user_order &other):order(other.order), username(other.username){}
+		~user_order() = default; 
+		bool operator < (const user_order &other) const{
+			if(username < other.username) return true;
+			else if(username > other.username) return false;
+			else{
+				if(order < other.order) return true;
+				else return false;
+			}
+		}
+	};
 	class ticket_user_train{
 	private:
 		string<20> trainID;
@@ -23,9 +42,8 @@ namespace sjtu{
 		ticket_user_train() = default;
 		ticket_user_train(const string<20> &TrainID, const string<5> &Date, const string<20> &Leaving_station, const string<20> &Arriving_station, int Ticket_num, const string<5> &Leaving_time, const string<5> &Arriving_time, int Date_gap, int Date_fix, const string<8> &Status, int Price, int Leaving_num, int Arriving_num):trainID(TrainID), date(Date), leaving_station(Leaving_station), arriving_station(Arriving_station), ticket_num(Ticket_num), leaving_time(Leaving_time), arriving_time(Arriving_time), date_gap(Date_gap), date_fix(Date_fix), status(Status), price(Price), leaving_num(Leaving_num), arriving_num(Arriving_num){}
 		~ticket_user_train() = default; 
-		friend inline std::ostream &operator <<(std::ostream &os, const ticket_user_train &tut){
-			os << "[" << tut.status << "] " << tut.trainID << " " << tut.leaving_station << " " << tut.date << " " << tut.leaving_time << " -> " << tut.arriving_station << " " << add_date(tut.date, tut.date_gap) << " " << tut.arriving_time << " " << tut.price << " " << tut.ticket_num;
-			return os;
+		void print(){
+			std::cout << "[" << status << "] " << trainID << " " << leaving_station << " " << date << " " << leaving_time << " -> " << arriving_station << " " << add_date(date, date_gap) << " " << arriving_time << " " << price << " " << ticket_num << std::endl;
 		}
 		ticket_user_train &operator = (const ticket_user_train &other){
 			trainID = other.trainID;
@@ -53,11 +71,14 @@ namespace sjtu{
 				new(&status)string<8>("refunded");
 				return 1;
 			}
-			else if(status == string<8>("queue")){
+			else if(status == string<8>("pending")){
 				new(&status)string<8>("refunded");
 				return 0;
 			}
 			else return -1;
+		}
+		inline void success(){
+			new(&status)string<8>("success");
 		}
 		inline int get_ticketNum(){
 			return ticket_num;

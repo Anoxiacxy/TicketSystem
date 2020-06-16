@@ -8,66 +8,81 @@ namespace sjtu{
     class ticket_user_train_related{
     	friend class train_related;
 	    private:
-		    bptree<string<20>, vector<ticket_user_train> > ticket_user_train_tree;
-		    vector<pair<string<20>, ticket_user_train> > queue_list;
+		    bptree<user_order, ticket_user_train> ticket_user_train_tree;
+		    bptree<string<20>,int >order_num;
+		    vector<pair<user_order, ticket_user_train> > queue_list;
 	    public:
-	        ticket_user_train_related(): ticket_user_train_tree("ticket_user_train_tree", "ticket_user_train_index"), queue_list(){}
-	        inline void add_ticket(const string<20> &username, const string<20> &trainID, const string<5> &date, const string<20> &leaving_station, const string<20> &arriving_station, int ticket_num, const string<5> &leaving_time, const string<5> &arriving_time, int date_gap, int date_fix, const string<8> &status, int price, int num1, int num2){
-				int success = ticket_user_train_tree.count(username);
-				ticket_user_train tmp(trainID, date, leaving_station, arriving_station, ticket_num, leaving_time, arriving_time, date_gap, date_fix, status, price, num1, num2);
-				if(success == 0){
-					vector<ticket_user_train> TMP;
-				    TMP.push_back(tmp);
-					ticket_user_train_tree.insert(username, TMP);   
-				}     	
-				else{
-					vector<ticket_user_train> TMP = ticket_user_train_tree.at(username);
-					TMP.push_back(tmp);
-					ticket_user_train_tree.modify(username, TMP);   
+	        ticket_user_train_related(): ticket_user_train_tree("ticket_user_train_tree", "ticket_user_train_index"), order_num("order_num_tree", "order_num_index"), queue_list(){}
+	        inline int add_ticket(const string<20> &username, const string<20> &trainID, const string<5> &date, const string<20> &leaving_station, const string<20> &arriving_station, int ticket_num, const string<5> &leaving_time, const string<5> &arriving_time, int date_gap, int date_fix, const string<8> &status, int price, int num1, int num2){
+				int success1 = order_num.count(username);
+				int data = 0;
+				if(success1 == 0){
+					order_num.insert(username, 1);
 				}
+				else{
+					int tmp = order_num.at(username);
+					data = tmp;
+					++tmp;
+					order_num.modify(username, tmp);
+				}
+				ticket_user_train tmp(trainID, date, leaving_station, arriving_station, ticket_num, leaving_time, arriving_time, date_gap, date_fix, status, price, num1, num2);
+				ticket_user_train_tree.insert(user_order(data, username), tmp);
+				return data;
 			}
-			inline void add_queue(const string<20> &username, const string<20> &trainID, const string<5> &date, const string<20> &leaving_station, const string<20> &arriving_station, int ticket_num, const string<5> &leaving_time, const string<5> &arriving_time, int date_gap, int date_fix, const string<8> &status, int price, int num1, int num2){
+			inline void add_queue(const string<20> &username, int data, const string<20> &trainID, const string<5> &date, const string<20> &leaving_station, const string<20> &arriving_station, int ticket_num, const string<5> &leaving_time, const string<5> &arriving_time, int date_gap, int date_fix, const string<8> &status, int price, int num1, int num2){
 				ticket_user_train tmp(trainID, date, leaving_station, arriving_station, ticket_num, leaving_time, arriving_time, date_gap, date_fix,status, price, num1, num2);
-				queue_list.push_back(pair<string<20>, ticket_user_train>(username, tmp));
+				queue_list.push_back(pair<user_order, ticket_user_train>(user_order(data, username), tmp));
 			}
 			inline int query_order(const string<20> &username){
-				vector<ticket_user_train> TMP = ticket_user_train_tree.at(username);
-				if(TMP == vector<ticket_user_train>()) return -1;
-				for(int i = 0; i < TMP.size(); ++i){
-					std::cout << TMP[i] << std::endl;
+				int TMP1 = order_num.at(username);
+				if(TMP1 == 0){
+					std::cout << 0 << std::endl;
 				}
-				return 0;
+				else{
+					std::cout << TMP1 << std::endl;
+					auto TMP = ticket_user_train_tree.lower_bound(user_order(TMP1 - 1, username));
+				    for(int i = 0; i < TMP1; ++i){
+				    	ticket_user_train A = *(TMP);
+				    	A.print();
+					    --TMP;
+				    }
+				}
 			}
 			inline int refund_ticket(const string<20> &username, int num, train_related &T){
-				vector<ticket_user_train> TMP = ticket_user_train_tree.at(username);
-				if(TMP == vector<ticket_user_train>()) return -1;
-				else if(num > TMP.size()) return -1;
+				int TMP = order_num.at(username);
+				if(num > TMP) return -1;
 				else{
-					int op = TMP[TMP.size() - num].refund_ticket();
+					ticket_user_train tmp = ticket_user_train_tree.at(user_order(TMP - num, username));
+					int op = tmp.refund_ticket();
 					if(op == 0){
+						ticket_user_train_tree.modify(user_order(TMP - num, username), tmp);
 						int i = 0;
 						for(i = 0; i < queue_list.size(); ++i){
-							if(queue_list[i].first == username  && queue_list[i].second == TMP[TMP.size() - num]){
+							if(queue_list[i].first.order = TMP && queue_list[i].first.username == username && queue_list[i].second == tmp){
 								queue_list.erase(i);
-								break;//处理不了一样的订单 
+								break;
 							}
 						}
 					}
-					else{
-						T.refund_ticket(TMP[TMP.size() - num].get_trainID(), TMP[TMP.size() - num].get_startdate(), TMP[TMP.size() - num].get_ticketNum(), TMP[TMP.size() - num].get_num1(), TMP[TMP.size() - num].get_num2());
-						vector<int> cmp_train;
+					else if(op == 1){
+						ticket_user_train_tree.modify(user_order(TMP - num, username), tmp);
+						T.refund_ticket(tmp.get_trainID(), tmp.get_startdate(), tmp.get_ticketNum(), tmp.get_num1(), tmp.get_num2());
 						bool flag = false;
 						for(int i = 0; i < queue_list.size(); ++i){
-							if(TMP[TMP.size() - num].get_trainID() == queue_list[i].second.get_trainID()){
+							if(tmp.get_trainID() == queue_list[i].second.get_trainID() && queue_list[i].second.get_startdate() == tmp.get_startdate()){
 								flag = T.query_num(queue_list[i].second.get_trainID(), queue_list[i].second.get_startdate(), queue_list[i].second.get_ticketNum(), queue_list[i].second.get_num1(), queue_list[i].second.get_num2());
 								if(flag){
+									queue_list[i].second.success();
+									ticket_user_train_tree.modify(queue_list[i].first, queue_list[i].second);
 									queue_list.erase(i);
 									flag = false;
+									--i;
 									continue;
 								}
 							}
 						}
 					}
+					else return -1;
 					return 0; 
 				}
 			}

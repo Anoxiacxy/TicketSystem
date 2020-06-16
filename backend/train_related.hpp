@@ -18,17 +18,19 @@ namespace sjtu{
 			}	    	
 		} 
 		int release_train(const string<20> &TrainID){
+			std::cout << "WWW" << std::endl;
 			train tmp = traintree.at(TrainID);
 			if(tmp.stationNum == 0) return -1;
 			else{
 				if(tmp.isrelease()) return -1;
 				else{
 					tmp.modify_release();
+					traintree.modify(TrainID, tmp);
 					return 0;
 				}
 			}
 		}
-		bool release(const string<20> &TrainID){
+		bool release(const string<20> &TrainID){	
 			train tmp = traintree.at(TrainID);
 			if(tmp.stationNum == 0) return false;
 			else{
@@ -56,11 +58,15 @@ namespace sjtu{
 			if(tmp.stationNum == 0) return pair<int, route>(-1, route());
 			else{
 				route Route = tmp.query_route(Date, Leaving_station, Arriving_station);
-				if(Route.price == -1) return pair<int, route>(-1, route());
+				if(Route == route()) return pair<int, route>(-1, route());
 				else{
-					string<5> tmpDate = minus_date(Date, Route.date_fix);
+					string<5> tmpDate = minus_date(Date, Route.date_fix1);
+					if(cmp_date(tmp.get_saleDate_from(), tmpDate) == 1 || cmp_date(tmp.get_saleDate_to(), tmpDate) == -1) return pair<int, route>(-1, route());
 					bool flag = tmp.query_ticket(Route.leaving_station, Route.arriving_station, tmpDate, TicketNum);
-					if(flag) return pair<int, route>(1, Route);
+					if(flag){
+						traintree.modify(TrainID, tmp);
+						return pair<int, route>(1, Route);
+					} 
 					else return pair<int, route>(0, Route);
 				}
 			}
@@ -68,10 +74,13 @@ namespace sjtu{
 		inline void refund_ticket(const string<20> &TrainID, const string<5> &date, int ticketNum, int num1, int num2){
 			train tmp = traintree.at(TrainID);
 			tmp.refund_ticket(num1, num2, date, ticketNum);
+			traintree.modify(TrainID, tmp);
 		}
 		inline bool query_num(const string<20> &TrainID, const string<5> &date, int ticketNum, int num1, int num2){
 			train tmp = traintree.at(TrainID);
-			return tmp.query_ticket(num1, num2, date, ticketNum);
+			bool res = tmp.query_ticket(num1, num2, date, ticketNum);
+			traintree.modify(TrainID, tmp);
+			return res;
 		}
 		
 		inline int query_seat(const string<20> &TrainID, const string<5> &date, int num1, int num2){

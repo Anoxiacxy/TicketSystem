@@ -1089,7 +1089,9 @@ namespace sjtu
 				else {
 					if (t == x.size) {
 						if (x.pos != tail) return ++iterator(x, t - 1, this);
-						else return iterator(node(invalid_off, invalid_off, invalid_off, true), 0, this);
+						else {
+							return iterator(node(invalid_off, invalid_off, invalid_off, true), 0, this);
+						}
 					}
 					else return iterator(x, t, this);
 				}

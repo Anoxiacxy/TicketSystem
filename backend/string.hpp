@@ -52,6 +52,13 @@ namespace sjtu{
 			else if(size() == other.size()) return 0;
 			else return 1;
 		}
+		int toint(){
+			int ans = 0;
+			for(int i = 0; i < size(); ++i){
+				ans += (int)(*this)[i];
+			}
+			return ans;
+		}
 		template <int other_length>
 		bool operator == (const string<other_length> &other) const{
 			if(size() != other.size()) return false;
