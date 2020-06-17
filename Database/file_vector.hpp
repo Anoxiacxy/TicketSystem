@@ -76,6 +76,14 @@ namespace SJTU {
 		bool empty() const {
 			return sz == 0;
 		}
+
+		void erase(const size_t &index) {
+			for (int i = index; i < sz - 1; ++i) {
+				T tmp = operator[](i + 1);
+				modify(i, tmp);
+			}
+			--sz;
+		}
 	};
 }
 
