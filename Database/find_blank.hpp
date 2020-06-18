@@ -29,8 +29,11 @@ public:
 	}
 
 	~find_blank() {
+		std::cerr << "testing" << std::endl;
 		if (blank) delete blank;
+		std::cerr << "testing" << std::endl;
 		if (index_file) delete index_file;
+		std::cerr << "testing" << std::endl;
 	}
 
 	void init(const char *in_file) {
@@ -99,6 +102,7 @@ public:
 			blank[num++] = pos;
 		}
 		save_info();
+		num = 0;
 		size = invalid_off;
 		delete blank;
 		blank = nullptr;
