@@ -96,6 +96,60 @@ namespace sjtu{
 			return minus_date(date, date_fix);
 		}
 	};//username作为索引不包含在该类中 
+	class queue_index{
+	public:
+		string<20> station; // trainID
+		string<5> startdate;
+		int order_num;
+	//	int order_num2;
+	public:
+		queue_index() = default;
+		queue_index(const string<20> &Station, const string<5> &Startdate, int Order_num):station(Station),startdate(Startdate),order_num(Order_num){}
+		queue_index(const queue_index &other):station(other.station), startdate(other.startdate),order_num(other.order_num){}
+		bool operator < (const queue_index &other) const{
+			if(station < other.station) return true;
+			else if(station > other.station) return false;
+			else{
+				if(startdate < other.startdate) return true;
+				else if(startdate > other.startdate) return false;
+				else{
+					if(order_num < other.order_num) return true;
+	//				else if(order_num > other.order_num) return false;
+	//				else{
+	//					if(order_num2 < other.order_num2) return true;
+	//					else return false;
+	//				}
+	            else return false;
+				}
+			}
+		}
+		queue_index &operator =(const queue_index &other){
+			new(this)queue_index(other);
+			return *this;
+		}
+		bool operator == (const queue_index &other) const{
+			return station == other.station && startdate == other.startdate && order_num == other.order_num; 
+		}
+	};
+	class queue_value{
+	public:
+		int num1;
+		int num2;
+		int num3;
+	//	int num4;
+		USERNAME username;
+	public:
+		queue_value() = default;
+		queue_value(int Num1, int Num2, int Num3, const USERNAME &Username):num1(Num1), num2(Num2), num3(Num3), username(Username){}
+		queue_value(const queue_value &other):num1(other.num1), num2(other.num2), num3(other.num3), username(other.username){}
+		queue_value &operator =(const queue_value &other){
+			new(this)queue_value(other);
+			return *this;
+		}
+		bool operator == (const queue_value &other) const{
+			return num1 == other.num1 && num2 == other.num2 && num3 == other.num3 && username == other.username;
+		}
+	};
 } 
 
 #endif

@@ -1,6 +1,7 @@
 #include "interpreter.hpp"
 using namespace sjtu;
 char a[90000000]; 
+bool cleaned = false;
 int main(){
 	std::ios::sync_with_stdio(false);
     std::cin.tie(0);

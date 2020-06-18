@@ -5,7 +5,7 @@
 #include "ticket_train_related.hpp"
 #include "ticket_user_train_related.hpp"
 #include <iostream> 
-#include <fstream>
+#include <fstream> 
 
 namespace sjtu{
 class Interpreter{
@@ -26,6 +26,7 @@ class Interpreter{
     	outfile << buff;
     	outfile.close();
     	infile.open("data.txt");
+    	std::ofstream otfile("data111.txt");
     	string<15>tmp;
     	while(infile >> tmp){
     	    if(tmp == string<10>("add_user")){
@@ -224,26 +225,6 @@ class Interpreter{
 				}
 				int tmp = T.add_train(trainID, stationNum, stations, prices, startTime, travelTimes, stopoverTimes, saleDate_from, saleDate_to, type, seatNum);
 				std::cout << tmp << std::endl;
-			/*	if(tmp == -1) continue;
-				else{
-					int date_gap = 0;
-					int date_fix = 0;
-					int price = 0;
-					string<5> arriving_time = startTime;
-					string<5> leaving_time = startTime;
-					for(int i = 0; i < stationNum; ++i){
-					    TT.add_ticket_train(stations[i], trainID, saleDate_from, saleDate_to, date_gap, date_fix, leaving_time, arriving_time, i, price);
-					    if(i != stationNum - 1){
-					    	price += prices[i + 1];
-					        pair<int, string<5> > tmpTime = add_time(leaving_time, travelTimes[i + 1]);
-					        date_fix += tmpTime.first;
-					        pair<int, string<5> > tmpTime2 = add_time(leaving_time, travelTimes[i + 1] + stopoverTimes[i + 1]);
-					        date_gap = tmpTime2.first - tmpTime.first;
-					        arriving_time = tmpTime.second;
-					        leaving_time = tmpTime2.second;
-						}
-				    }
-				} */
 		    } 
 		    else if(tmp == string<15>("release_train")){
 		    	string<20> trainID;
@@ -254,12 +235,10 @@ class Interpreter{
     	    			infile >> trainID;
 					}
 				}
-				std::cout << "WWW" << std::endl;
 				int data = T.release_train(trainID);
-				std::cout << data << std::endl;
 				if(data == 0){
 					train tmp = T.at(trainID);
-					TT.add(tmp, trainID);
+					TT.add(tmp, trainID, T);
 				}
 				std::cout << data << std::endl;
 		    }
@@ -282,7 +261,39 @@ class Interpreter{
 					if(cmp_date(Tmp.second.second.get_saleDate_from(), date) == 1 || cmp_date(Tmp.second.second.get_saleDate_to(), date) == -1) std::cout << -1 << std::endl;
 					else{
 						std::cout << trainID << " ";
-						Tmp.second.second.print(date);
+		//				Tmp.second.second.print(date);
+		                std::cout << Tmp.second.second.type << std::endl;
+			            int date_gap = 0;
+			            int date_fix = 0;
+			            string<5> arriving_time = Tmp.second.second.startTime;
+			            string<5> leaving_time = Tmp.second.second.startTime;
+			            string<5> arriving_date = date;
+			            string<5> leaving_date = date;
+			            int price = 0;
+			            int date_interval = minus_date(Tmp.second.second.saleDate_from, date);
+			            std::cout << T.Station1[Tmp.second.second.pos1] << " xx-xx" << " xx:xx" << " -> " << date << " " << leaving_time << " " << price << " " << T.Seat1[Tmp.second.second.pos2 + date_interval * (Tmp.second.second.stationNum - 1)] << std::endl; 
+			            price += T.Price1[Tmp.second.second.pos1 + 1];
+			            pair<int, string<5> > tmpTime1 = add_time(leaving_time, T.Time1[Tmp.second.second.pos1 + 1]);
+			            date_fix += tmpTime1.first;
+			            pair<int, string<5> > tmpTime3 = add_time(leaving_time, T.Time1[Tmp.second.second.pos1 + 1] + T.Time2[Tmp.second.second.pos1 + 1]);
+			            date_gap = tmpTime3.first - tmpTime1.first;
+			            arriving_date = add_date(leaving_date, tmpTime1.first);
+			            leaving_date = add_date(arriving_date, date_gap);
+			            arriving_time = tmpTime1.second;
+			            leaving_time = tmpTime3.second;
+			            for(int i = 1; i < Tmp.second.second.stationNum - 1; ++i){
+				            std::cout << T.Station1[Tmp.second.second.pos1 + i] << " " << arriving_date << " " << arriving_time << " -> " << leaving_date << " " << leaving_time << " " << price << " " << T.Seat1[Tmp.second.second.pos2 + date_interval * (Tmp.second.second.stationNum - 1) + i] << std::endl;
+			                price += T.Price1[Tmp.second.second.pos1 + i + 1];
+			                pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[Tmp.second.second.pos1 + i + 1]);
+				            date_fix += tmpTime.first;
+				            pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[Tmp.second.second.pos1 + i + 1] + T.Time2[Tmp.second.second.pos1 + i + 1]);
+				            date_gap = tmpTime2.first - tmpTime.first;
+				            arriving_date = add_date(leaving_date, tmpTime.first);
+				            leaving_date = add_date(arriving_date, date_gap);
+				            arriving_time = tmpTime.second;
+				            leaving_time = tmpTime2.second;
+			            }
+			            std::cout << T.Station1[Tmp.second.second.pos1 + Tmp.second.second.stationNum - 1] << " " << arriving_date << " " << arriving_time << " -> xx-xx" << " xx:xx " << price <<  " x\n";
 					}
 				}
 		    }
@@ -435,6 +446,7 @@ class Interpreter{
 				else{
 					pair<int, route> tmpdata = T.query_ticket(trainID, date, leaving_station, arriving_station, ticketNum);
 					int flag = tmpdata.first;
+					//std::cout << flag << std::endl;
 					if(flag == -1) std::cout << -1 << std::endl;
 					else if(flag == 0 && queue == string<5>("false")) std::cout << -1 << std::endl;
 					else if(flag == 0 && queue == string<5>("true")){
@@ -466,7 +478,7 @@ class Interpreter{
 		    else if(tmp == string<15>("refund_ticket")){
 		    	string<20> username;
 		    	int n = 1;
-		    	while(infile.get() != 10){
+		    	while(infile.get() != 10 && !infile.eof()){
     	    		string<3> op;
     	    		infile >> op;
     	    		if(op == string<3>("-u")){
@@ -500,6 +512,7 @@ class Interpreter{
 				std::cout.flush();
 			}
 	    }
+	    otfile.close();
     }
 };
 }

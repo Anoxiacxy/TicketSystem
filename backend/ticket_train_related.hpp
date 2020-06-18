@@ -36,7 +36,7 @@ namespace sjtu{
 			}
 		}; 
 		ticket_train_related():ticket_train_tree("ticket_train_tree", "ticket_train_index"){}
-		void add(const train &tmp, const string<20> &trainID){
+		void add(const train &tmp, const string<20> &trainID, const train_related &T){
 			int date_gap = 0;
 			int date_fix = 0;
 			int date_fix1 = 0;
@@ -44,14 +44,16 @@ namespace sjtu{
 			string<5> arriving_time = tmp.startTime;
 			string<5> leaving_time = tmp.startTime;
 			for(int i = 0; i < tmp.stationNum; ++i){
-				std::cout << i << "WWW" << std::endl;
-				add_ticket_train(tmp.stations[i], trainID, tmp.saleDate_from, tmp.saleDate_to, date_gap, date_fix1, leaving_time, arriving_time, i, price);
+				add_ticket_train(T.Station1[tmp.pos1 + i], trainID, tmp.saleDate_from, tmp.saleDate_to, date_gap, date_fix1, leaving_time, arriving_time, i, price);
 				if(i != tmp.stationNum - 1){
-					pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+				//	pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+				    pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 					date_fix += tmpTime.first;
 					date_fix1 = date_fix;
-					price += tmp.prices[i + 1];
-					pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				//	price += tmp.prices[i + 1];
+					price += T.Price1[tmp.pos1 + i + 1];
+				//	pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				    pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 					date_gap = tmpTime2.first - tmpTime.first;
 					date_fix += date_gap;
 					arriving_time = tmpTime.second;
@@ -210,9 +212,9 @@ namespace sjtu{
 			        string<5> leaving_time1;
 			        for(int i = 0; i < tmp.stationNum; ++i){
 			        	if(flag){
-			        		set1.insert(pair<key, string<20> >(key{tmp.stations[i], arriving_time, leaving_time1, date_gap, date_fix2 - date_fix1, date_fix2, price - price1, tmp.saleDate_from, tmp.saleDate_to, num, i}, TrainID));
+			        		set1.insert(pair<key, string<20> >(key{T.Station1[tmp.pos1 + i], arriving_time, leaving_time1, date_gap, date_fix2 - date_fix1, date_fix2, price - price1, tmp.saleDate_from, tmp.saleDate_to, num, i}, TrainID));
 						}
-						if(station1 == tmp.stations[i]){
+						if(station1 == T.Station1[tmp.pos1 + i]){
 							flag = true;
 							date_fix1 = date_fix2 + date_gap;
 							price1 = price;
@@ -220,11 +222,11 @@ namespace sjtu{
 							leaving_time1 = leaving_time;
 						}
 						if(i == tmp.stationNum - 1) break;
-			            price += tmp.prices[i + 1];
-			            pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+			            price += T.Price1[tmp.pos1 + i + 1];
+			            pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 				        date_fix += tmpTime.first;
 				        date_fix2 = date_fix;
-				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 				        date_gap = tmpTime2.first - tmpTime.first;
 				        date_fix += date_gap;
 				        arriving_time = tmpTime.second;
@@ -255,7 +257,7 @@ namespace sjtu{
 			        string<5> arriving_time1;
 			        int price = 0;
 			        for(int i = 0; i < tmp.stationNum; ++i){
-						if(station2 == tmp.stations[i]){
+						if(station2 == T.Station1[tmp.pos1 + i]){
 							date_fix1 = date_fix2;
 							price1 = price;
 							num = i;
@@ -263,11 +265,11 @@ namespace sjtu{
 							date_gap1 = date_gap;
 							break;
 						}
-			            price += tmp.prices[i + 1];
-			            pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+			            price += T.Price1[tmp.pos1 + i + 1];
+			            pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 				        date_fix += tmpTime.first;
 				        date_fix2 = date_fix;
-				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 				        date_gap = tmpTime2.first - tmpTime.first;
 				        date_fix += date_gap;
 				        arriving_time = tmpTime.second;
@@ -280,15 +282,15 @@ namespace sjtu{
 			        leaving_time = tmp.startTime;
 			        price = 0;
 			        for(int i = 0; i < tmp.stationNum; ++i){
-						if(station2 == tmp.stations[i]){
+						if(station2 == T.Station1[tmp.pos1 + i]){
 							break;
 						}
-						set2.insert(pair<key, string<20> >(key{tmp.stations[i], arriving_time1, leaving_time, date_gap, date_fix1 - date_fix2 - date_gap, date_fix2, price1 - price, tmp.saleDate_from, tmp.saleDate_to, i, num}, TrainID));
-			            price += tmp.prices[i + 1];
-			            pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+						set2.insert(pair<key, string<20> >(key{T.Station1[tmp.pos1 + i], arriving_time1, leaving_time, date_gap, date_fix1 - date_fix2 - date_gap, date_fix2, price1 - price, tmp.saleDate_from, tmp.saleDate_to, i, num}, TrainID));
+			            price += T.Price1[tmp.pos1 + i + 1];
+			            pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 				        date_fix += tmpTime.first;
 				        date_fix2 = date_fix;
-				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 				        date_gap = tmpTime2.first - tmpTime.first;
 				        date_fix += date_gap;
 				        arriving_time = tmpTime.second;
@@ -308,6 +310,7 @@ namespace sjtu{
 					if(it1->first.station != it2->first.station){
 						continue;
 					}
+					if(it1->second == it2->second) continue;
 					if(minus_date(date, it1->first.date_fix2 - it1->first.date_fix1) < it1->first.saledate_from || minus_date(date, it1->first.date_fix2 - it1->first.date_fix1) > it1->first.saledate_to) continue;
 					if(add_date(date, it1->first.date_fix1) < add_date(it2->first.saledate_to, it2->first.date_fix2) || (add_date(date, it1->first.date_fix1) == add_date(it2->first.saledate_to, it2->first.date_fix2) && it1->first.timearrive <= it2->first.timeleave)){
 						string<5> tmpdate;
@@ -360,9 +363,9 @@ namespace sjtu{
 			        string<5> leaving_time1;
 			        for(int i = 0; i < tmp.stationNum; ++i){
 			        	if(flag){
-			        		set1.insert(pair<key, string<20> >(key{tmp.stations[i], arriving_time, leaving_time1, date_gap, date_fix2 - date_fix1, date_fix2, price - price1, tmp.saleDate_from, tmp.saleDate_to, num, i}, TrainID));
+			        		set1.insert(pair<key, string<20> >(key{T.Station1[tmp.pos1 + i], arriving_time, leaving_time1, date_gap, date_fix2 - date_fix1, date_fix2, price - price1, tmp.saleDate_from, tmp.saleDate_to, num, i}, TrainID));
 						}
-						if(station1 == tmp.stations[i]){
+						if(station1 == T.Station1[tmp.pos1 + i]){
 							flag = true;
 							date_fix1 = date_fix2 + date_gap;
 							price1 = price;
@@ -370,11 +373,11 @@ namespace sjtu{
 							leaving_time1 = leaving_time;
 						}
 						if(i == tmp.stationNum - 1) break;
-			            price += tmp.prices[i + 1];
-			            pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+			            price += T.Price1[tmp.pos1 + i + 1];
+			            pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 				        date_fix += tmpTime.first;
 				        date_fix2 = date_fix;
-				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 				        date_gap = tmpTime2.first - tmpTime.first;
 				        date_fix += date_gap;
 				        arriving_time = tmpTime.second;
@@ -405,7 +408,7 @@ namespace sjtu{
 			        string<5> arriving_time1;
 			        int price = 0;
 			        for(int i = 0; i < tmp.stationNum; ++i){
-						if(station2 == tmp.stations[i]){
+						if(station2 == T.Station1[tmp.pos1 + i]){
 							date_fix1 = date_fix2;
 							price1 = price;
 							num = i;
@@ -413,11 +416,11 @@ namespace sjtu{
 							date_gap1 = date_gap;
 							break;
 						}
-			            price += tmp.prices[i + 1];
-			            pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+			            price += T.Price1[tmp.pos1 + i + 1];
+			            pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 				        date_fix += tmpTime.first;
 				        date_fix2 = date_fix;
-				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 				        date_gap = tmpTime2.first - tmpTime.first;
 				        date_fix += date_gap;
 				        arriving_time = tmpTime.second;
@@ -430,15 +433,15 @@ namespace sjtu{
 			        leaving_time = tmp.startTime;
 			        price = 0;
 			        for(int i = 0; i < tmp.stationNum; ++i){
-						if(station2 == tmp.stations[i]){
+						if(station2 == T.Station1[tmp.pos1 + i]){
 							break;
 						}
-						set2.insert(pair<key, string<20> >(key{tmp.stations[i], arriving_time1, leaving_time, date_gap, date_fix1 - date_fix2 - date_gap, date_fix2, price1 - price, tmp.saleDate_from, tmp.saleDate_to, i, num}, TrainID));
-			            price += tmp.prices[i + 1];
-			            pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
+						set2.insert(pair<key, string<20> >(key{T.Station1[tmp.pos1 + i], arriving_time1, leaving_time, date_gap, date_fix1 - date_fix2 - date_gap, date_fix2, price1 - price, tmp.saleDate_from, tmp.saleDate_to, i, num}, TrainID));
+			            price += T.Price1[tmp.pos1 + i + 1];
+			            pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 				        date_fix += tmpTime.first;
 				        date_fix2 = date_fix;
-				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
+				        pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 				        date_gap = tmpTime2.first - tmpTime.first;
 				        date_fix += date_gap;
 				        arriving_time = tmpTime.second;
@@ -466,7 +469,7 @@ namespace sjtu{
 						if(it1->first.price + it2->first.price < min || (it1->first.price + it2->first.price == min) && (minus_time(it1->first.timeleave, it1->first.timearrive) + 1440 * it1->first.date_fix1) < (minus_time(ans1.leaving_time, ans1.arriving_time) + 1440 * minus_date(ans1.leaving_date, ans1.arriving_date))){
 							min = it1->first.price + it2->first.price;
 							string<5> tmpdate;
-							if(add_date(date, it1->first.date_fix1) < add_date(it2->first.saledate_from, it2->first.date_fix2 +it2->first.date_gap)) tmpdate = add_date(it2->first.saledate_from, it2->first.date_fix2);
+							if(add_date(date, it1->first.date_fix1) < add_date(it2->first.saledate_from, it2->first.date_fix2 +it2->first.date_gap)) tmpdate = add_date(it2->first.saledate_from, it2->first.date_fix2 + it2->first.date_gap);
 							else{
 								tmpdate = add_date(date, it1->first.date_fix1);
 								if(it1->first.timearrive > it2->first.timeleave) tmpdate = add_date(tmpdate, 1);

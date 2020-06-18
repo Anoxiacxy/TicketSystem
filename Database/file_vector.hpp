@@ -6,16 +6,16 @@
 #include "find_blank.hpp"
 
 namespace SJTU {
-	template<typename T, const char *filename> class vector{
+	template<typename T, const char *filename> class file_vector{
 	private:
 		FILE *f;
 		size_t sz;
 	public:
-		vector() {
+		file_vector() {
 			buffer_read(&sz, 0, sizeof(size_t), filename);
 		}
 		
-		~vector() {
+		~file_vector() {
 			buffer_write(&sz, 0, sizeof(size_t), filename);
 		}
 		

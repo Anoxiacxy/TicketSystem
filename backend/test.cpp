@@ -2,12 +2,11 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
-#include "priority_queue.hpp"
-using namespace sjtu;
+#include "interpreter.hpp"
+using namespace std;
+bool cleaned = false;
 int main(){
-	priority_queue<int> q;
-	q.push(1);
-	q.push(2);
-	std::cout << q.top();
+	sjtu::string<30> MailAddr = sjtu::string<30>("abolition.of@property.generall");
+	std::cout << MailAddr;
  	return 0;
 }

@@ -5,10 +5,12 @@
 #include "vector.hpp"
 #include "../uti.hpp"
 namespace sjtu{
+	char loginlist[] = "loginlist";
 	class user_related{
 	private:
 		bptree<USERNAME, user> usertree;
-	    vector<pair<USERNAME, PRIVILEGE> >login_list;  
+	   // vector<pair<USERNAME, PRIVILEGE> >login_list;
+	    SJTU::file_vector<pair<USERNAME, PRIVILEGE> , loginlist> login_list;  
 	public:
 		user_related():usertree("usertree", "userindex"), login_list(){}
 	    int add_user(const USERNAME &Username, const PASSWORD &Password, const NAME &Name, const MAILADDR &MailAddr, PRIVILEGE Privilege){
@@ -58,7 +60,8 @@ namespace sjtu{
 				if(login_list[i].first == Username) break;
 				if(login_list[i].first != Username && i == login_list.size() - 1) return -1;
 			}
-			login_list.erase(i);
+			login_list.modify(i, login_list[login_list.size() - 1]);
+			login_list.pop_back();
 			return 0;
 		}
 		pair<bool, pair<USERNAME, user> > query_profile(const USERNAME &Username1, const USERNAME &Username2){
@@ -88,7 +91,8 @@ namespace sjtu{
 				if(Privilege != invalid_privilege){
 					tmp.modify_privilege(Privilege);
 					for(int i = 0; i < login_list.size(); ++i){
-						if(login_list[i].first == Username2) login_list[i].second = Privilege; 
+				//		if(login_list[i].first == Username2) login_list[i].second = Privilege; 
+				        if(login_list[i].first == Username2) login_list.modify(i, pair<USERNAME, PRIVILEGE>(Username2, Privilege));
 					}
 				}
 				bool flag = usertree.modify(Username2, tmp);
@@ -96,8 +100,10 @@ namespace sjtu{
 			}
 		}
 		inline void exit(){
-			login_list.clear();
-			new(&login_list)vector<pair<USERNAME, PRIVILEGE> >();
+			login_list.clean();
+//			cleaned = true;
+			login_list.init();
+//			cleaned = false;
 		}	
 	};
 }
