@@ -34,10 +34,11 @@ int main() {
 	// std::cerr << "fuck" << std::endl;
 	sjtu::bptree<str<char, 20>, Val> tr("fuck", "fucking");
 	// std::cerr << "fuck" << std::endl;
+	sjtu::bptree<str<char, 20>, Val> tr1("fuck1", "fucking1");
 	str<char, 20> pp;
 	char mmp[20];
 	pp = mmp;
 	tr.insert(pp, 100);
 	printf("%d\n", tr.count(pp));
-	tr.clear();
+//	tr.clear();
 }

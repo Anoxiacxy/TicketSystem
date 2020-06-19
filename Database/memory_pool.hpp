@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdlib>
-
+#include <iostream>
 #ifndef __MEMORY_POOL__
 #define __MEMORY_POOL__
 

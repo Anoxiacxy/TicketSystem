@@ -20,14 +20,9 @@ class Interpreter{
     	ticket_train_related TT;
     public:
     Interpreter(){}
-    void operator() (char *buff) {
-    	std::ofstream outfile("data.txt");
-    	std::ifstream infile;
-    	outfile << buff;
-    	outfile.close();
-    	infile.open("data.txt");
+    void operator() () {
     	string<15>tmp;
-    	while(infile >> tmp){
+    	while(std::cin >> tmp){
     	    if(tmp == string<10>("add_user")){
     	    	string<20> username1;
     	    	string<20> username2;
@@ -35,26 +30,26 @@ class Interpreter{
     	    	string<10> name;
     	    	string<30> mailAddr;
     	    	int privilege;
-    	    	while(infile.get() != 13 && !infile.eof()){
+    	    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-c")){
-    	    			infile >> username1;
+    	    			std::cin >> username1;
 					}
 					else if(op == string<3>("-u")){
-    	    			infile >> username2;
+    	    			std::cin >> username2;
 					}
 					else if(op == string<3>("-p")){
-    	    			infile >> password;
+    	    			std::cin >> password;
 					}
 					else if(op == string<3>("-n")){
-    	    			infile >> name;
+    	    			std::cin >> name;
 					}
 					else if(op == string<3>("-m")){
-    	    			infile >> mailAddr;
+    	    			std::cin >> mailAddr;
 					}
 					else if(op == string<3>("-g")){
-    	    			infile >> privilege;
+    	    			std::cin >> privilege;
 					}
 				}
 				if(username1 == string<20>("cur")){
@@ -67,25 +62,25 @@ class Interpreter{
 		    else if(tmp == string<10>("login")){
 		    	string<20> username;
     	    	string<30> password;
-    	    	while(infile.get() != 13 && !infile.eof()){
+    	    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
 					if(op == string<3>("-u")){
-    	    			infile >> username;
+    	    			std::cin >> username;
 					}
 					else if(op == string<3>("-p")){
-    	    			infile >> password;
+    	    			std::cin >> password;
 					}
 				}
 				std::cout << U.login(username, password) << std::endl;
 		    }
 		    else if(tmp == string<10>("logout")){
 		    	string<20> username;
-    	    	while(infile.get() != 13 && !infile.eof()){
+    	    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
 					if(op == string<3>("-u")){
-    	    			infile >> username;
+    	    			std::cin >> username;
 					}
 				}
 				std::cout << U.logout(username) << std::endl;
@@ -93,14 +88,14 @@ class Interpreter{
 		    else if(tmp == string<15>("query_profile")){
 		    	string<20> username1;
     	    	string<20> username2;
-    	    	while(infile.get() != 13 && !infile.eof()){
+    	    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-c")){
-    	    			infile >> username1;
+    	    			std::cin >> username1;
 					}
 					else if(op == string<3>("-u")){
-    	    			infile >> username2;
+    	    			std::cin >> username2;
 					}
 				}
 				pair<bool, pair<USERNAME, user> > Tmp = U.query_profile(username1, username2);
@@ -116,26 +111,26 @@ class Interpreter{
     	    	string<10> name = invalid_name;
     	    	string<30> mailAddr = invalid_mailAddr;
     	    	int privilege = invalid_privilege;
-    	    	while(infile.get() != 13 && !infile.eof()){
+    	    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-c")){
-    	    			infile >> username1;
+    	    			std::cin >> username1;
 					}
 					else if(op == string<3>("-u")){
-    	    			infile >> username2;
+    	    			std::cin >> username2;
 					}
 					else if(op == string<3>("-p")){
-    	    			infile >> password;
+    	    			std::cin >> password;
 					}
 					else if(op == string<3>("-n")){
-    	    			infile >> name;
+    	    			std::cin >> name;
 					}
 					else if(op == string<3>("-m")){
-    	    			infile >> mailAddr;
+    	    			std::cin >> mailAddr;
 					}
 					else if(op == string<3>("-g")){
-    	    			infile >> privilege;
+    	    			std::cin >> privilege;
 					}
 				}
 				pair<bool, pair<USERNAME, user> > Tmp = U.modify_profile(username1, username2, password, name, mailAddr, privilege);
@@ -148,17 +143,17 @@ class Interpreter{
 		    	string<20> trainID;
 		    	int stationNum;
 		    	int seatNum;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-i")){
-    	    			infile >> trainID;
+    	    			std::cin >> trainID;
 					}
 					else if(op == string<3>("-n")){
-    	    			infile >> stationNum;
+    	    			std::cin >> stationNum;
 					}
 					else if(op == string<3>("-m")){
-    	    			infile >> seatNum;
+    	    			std::cin >> seatNum;
     	    			break;
 					}
 				}
@@ -170,56 +165,56 @@ class Interpreter{
 		    	string<5> saleDate_from;
 		    	string<5> saleDate_to;
 		    	char type;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-s")){
-    	    			infile.get();
+    	    			std::cin.get();
     	    			for(int i = 0; i < stationNum - 1; ++i){
     	    				char Tmp[21];
-    	    				infile.getline(Tmp, 21, '|');
+    	    				std::cin.getline(Tmp, 21, '|');
     	    				stations[i] = string<20>(Tmp);
 						}
-						infile >> stations[stationNum - 1];
+						std::cin >> stations[stationNum - 1];
 					}
 					else if(op == string<3>("-p")){
 						prices[0] = -1;
 						for(int i = 1; i < stationNum - 1; ++i){
-							infile >> prices[i];
-							infile.get();
+							std::cin >> prices[i];
+							std::cin.get();
 						}
-						infile >> prices[stationNum - 1];
+						std::cin >> prices[stationNum - 1];
 					}
 					else if(op == string<3>("-x")){
-						infile >> startTime;
+						std::cin >> startTime;
 					}
 					else if(op == string<3>("-t")){
 						travelTimes[0] = -1;
 						for(int i = 1; i < stationNum - 1; ++i){
-							infile >> travelTimes[i];
-							infile.get();
+							std::cin >> travelTimes[i];
+							std::cin.get();
 						}
-						infile >> travelTimes[stationNum - 1];
+						std::cin >> travelTimes[stationNum - 1];
 					}
 					else if(op == string<3>("-o")){
-						if(stationNum == 2) infile.get();
+						if(stationNum == 2) std::cin.get();
 						stopoverTimes[0] = -1;
 						for(int i = 1; i < stationNum - 1; ++i){
-							infile >> stopoverTimes[i];
-							if(i != stationNum - 2) infile.get();
+							std::cin >> stopoverTimes[i];
+							if(i != stationNum - 2) std::cin.get();
 						}
 						stopoverTimes[stationNum - 1] = -1;
 					}
 					else if(op == string<3>("-d")){
 						char Tmp[6];
-						infile.get();
-    	    			infile.getline(Tmp, 6, '|');
+						std::cin.get();
+    	    			std::cin.getline(Tmp, 6, '|');
 						saleDate_from = string<5>(Tmp);
-						infile >> saleDate_to;
+						std::cin >> saleDate_to;
 					}
 					else if(op == string<3>("-y")){
-						infile.get();
-						infile >> type;
+						std::cin.get();
+						std::cin >> type;
 					}
 				}
 				int tmp = T.add_train(trainID, stationNum, stations, prices, startTime, travelTimes, stopoverTimes, saleDate_from, saleDate_to, type, seatNum);
@@ -227,11 +222,11 @@ class Interpreter{
 		    } 
 		    else if(tmp == string<15>("release_train")){
 		    	string<20> trainID;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-i")){
-    	    			infile >> trainID;
+    	    			std::cin >> trainID;
 					}
 				}
 				int data = T.release_train(trainID);
@@ -244,14 +239,14 @@ class Interpreter{
 		    else if(tmp == string<15>("query_train")){
 		    	string<20> trainID;
 		    	string<5> date;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-i")){
-    	    			infile >> trainID;
+    	    			std::cin >> trainID;
 					}
 					else if(op == string<3>("-d")){
-						infile >> date;
+						std::cin >> date;
 					}
 				}
 				pair<bool, pair<string<20>, train> > Tmp = T.query_train(trainID);
@@ -260,6 +255,7 @@ class Interpreter{
 					if(cmp_date(Tmp.second.second.get_saleDate_from(), date) == 1 || cmp_date(Tmp.second.second.get_saleDate_to(), date) == -1) std::cout << -1 << std::endl;
 					else{
 						std::cout << trainID << " ";
+		//				Tmp.second.second.print(date);
 		                std::cout << Tmp.second.second.type << std::endl;
 			            int date_gap = 0;
 			            int date_fix = 0;
@@ -297,11 +293,11 @@ class Interpreter{
 		    }
 		    else if(tmp == string<15>("delete_train")){
 		    	string<20> trainID;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-i")){
-    	    			infile >> trainID;
+    	    			std::cin >> trainID;
 					}
 				}
 				std::cout << T.delete_train(trainID) << std::endl;
@@ -311,20 +307,20 @@ class Interpreter{
 		    	string<20> station1;
 		    	string<20> station2;
 		    	string<5> cmp;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-d")){
-    	    			infile >> date;
+    	    			std::cin >> date;
 					}
 					else if(op == string<3>("-s")){
-						infile >> station1;
+						std::cin >> station1;
 					}
 					else if(op == string<3>("-t")){
-						infile >> station2;
+						std::cin >> station2;
 					} 
 					else if(op == string<3>("-p")){
-						infile >> cmp;
+						std::cin >> cmp;
 					}
 				}
 				if(cmp == string<5>("time")){
@@ -363,20 +359,20 @@ class Interpreter{
 		    	string<20> station1;
 		    	string<20> station2;
 		    	string<5> cmp;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-d")){
-    	    			infile >> date;
+    	    			std::cin >> date;
 					}
 					else if(op == string<3>("-s")){
-						infile >> station1;
+						std::cin >> station1;
 					}
 					else if(op == string<3>("-t")){
-						infile >> station2;
+						std::cin >> station2;
 					}
 					else if(op == string<3>("-p")){
-						infile >> cmp;
+						std::cin >> cmp;
 					}
 				}
 				if(cmp == string<5>("time")){
@@ -414,29 +410,29 @@ class Interpreter{
 		    	string<20> arriving_station;
 		    	int ticketNum;
 		    	string<5> queue("false");
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-u")){
-    	    			infile >> username;
+    	    			std::cin >> username;
 					}
 					else if(op == string<3>("-i")){
-    	    			infile >> trainID;
+    	    			std::cin >> trainID;
 					}
 					else if(op == string<3>("-d")){
-						infile >> date;
+						std::cin >> date;
 					}
 					else if(op == string<3>("-f")){
-						infile >> leaving_station;
+						std::cin >> leaving_station;
 					}
 					else if(op == string<3>("-t")){
-						infile >> arriving_station;
+						std::cin >> arriving_station;
 					}
 					else if(op == string<3>("-n")){
-						infile >> ticketNum;
+						std::cin >> ticketNum;
 					}
 					else if(op == string<3>("-q")){
-						infile >> queue;
+						std::cin >> queue;
 					}
 				}
 				bool log = U.query_log(username);
@@ -459,11 +455,11 @@ class Interpreter{
 		    }
 		    else if(tmp == string<15>("query_order")){
 		    	string<20> username;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-u")){
-    	    			infile >> username;
+    	    			std::cin >> username;
 					}
 				}
 				bool log = U.query_log(username);
@@ -475,14 +471,14 @@ class Interpreter{
 		    else if(tmp == string<15>("refund_ticket")){
 		    	string<20> username;
 		    	int n = 1;
-		    	while(infile.get() != 13 && !infile.eof()){
+		    	while(std::cin.get() != 13 && !std::cin.eof()){
     	    		string<3> op;
-    	    		infile >> op;
+    	    		std::cin >> op;
     	    		if(op == string<3>("-u")){
-    	    			infile >> username;
+    	    			std::cin >> username;
 					}
 					if(op == string<3>("-n")){
-						infile >> n;
+						std::cin >> n;
 					}
 				}
 				bool log = U.query_log(username);
@@ -507,9 +503,6 @@ class Interpreter{
 				U.exit();
 				std::cout << "bye" << std::endl;
 				std::cout.flush();
-			}
-			else if(infile.get() != infile.eof()){
-				continue;
 			}
 	    }
     }

@@ -46,13 +46,10 @@ namespace sjtu{
 			for(int i = 0; i < tmp.stationNum; ++i){
 				add_ticket_train(T.Station1[tmp.pos1 + i], trainID, tmp.saleDate_from, tmp.saleDate_to, date_gap, date_fix1, leaving_time, arriving_time, i, price);
 				if(i != tmp.stationNum - 1){
-				//	pair<int, string<5> > tmpTime = add_time(leaving_time, tmp.travelTimes[i + 1]);
 				    pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1]);
 					date_fix += tmpTime.first;
 					date_fix1 = date_fix;
-				//	price += tmp.prices[i + 1];
 					price += T.Price1[tmp.pos1 + i + 1];
-				//	pair<int, string<5> > tmpTime2 = add_time(leaving_time, tmp.travelTimes[i + 1] + tmp.stopoverTimes[i + 1]);
 				    pair<int, string<5> > tmpTime2 = add_time(leaving_time, T.Time1[tmp.pos1 + i + 1] + T.Time2[tmp.pos1 + i + 1]);
 					date_gap = tmpTime2.first - tmpTime.first;
 					date_fix += date_gap;

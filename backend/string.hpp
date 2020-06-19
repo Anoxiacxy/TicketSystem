@@ -31,7 +31,8 @@ namespace sjtu{
 			}
 		}
 		string() = default;
-		~string() = default;
+		~string(){
+		}
 		template <int other_length>
 		string &operator = (const string<other_length> &other){
 			new(this)string(other);

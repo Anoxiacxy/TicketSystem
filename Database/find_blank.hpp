@@ -5,7 +5,7 @@
 const off_t invalid_off = 0xdeadbeef;
 
 class find_blank {
-private:
+public:
 	const off_t K = 4096;
 	int num;
 	off_t size;
@@ -23,39 +23,35 @@ public:
 			blank = nullptr;
 			save_info();
 		} else {
+			blank = nullptr;
 			fclose(file);
+			load_info();
 			save_info();
 		}
 	}
 
 	~find_blank() {
-		std::cerr << "testing" << std::endl;
-		if (blank) delete blank;
-		std::cerr << "testing" << std::endl;
-		if (index_file) delete index_file;
-		std::cerr << "testing" << std::endl;
+		if (blank){
+			delete blank;
+		} 
+		if (index_file) delete index_file; 
 	}
 
 	void init(const char *in_file) {
 		index_file = new char[strlen(in_file) + 1];
 		strcpy(index_file, in_file);
 		FILE *file = fopen(index_file, "rb+");
-		// std::cerr << "fucking" << std::endl;
 		if (!file) {
 			num = 0;
 			size = 3 * sizeof(off_t);
 			blank = nullptr;
-
-			// std::cerr << "fucking" << std::endl;
 			save_info();
-			// std::cerr << "fucking" << std::endl;
 		}
 		else {
+			blank = nullptr;
 			fclose(file);
-			
-			// std::cerr << "fucking" << std::endl;
+			load_info();
 			save_info();
-			// std::cerr << "fucking" << std::endl;
 		}
 	}
 
@@ -108,3 +104,4 @@ public:
 		blank = nullptr;
 	}
 };
+

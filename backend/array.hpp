@@ -37,11 +37,11 @@ namespace sjtu{
 		inline int operator-(const iterator &rhs)const{
 			return pos - rhs.pos;
 		}
-		inline iterator operator +=(const int &n)const{
+		inline iterator operator +=(const int &n){
 			pos += n;
 			return *this;
 		}
-		inline iterator operator -=(const int &n)const{
+		inline iterator operator -=(const int &n){
 			pos -= n;
 			return *this;
 		}

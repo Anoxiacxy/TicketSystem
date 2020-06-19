@@ -23,13 +23,6 @@ namespace SJTU {
 			return sz;
 		}
 
-		// void _init() {
-		// 	sz = 0;
-		// 	FILE *f = fopen(filename, "rb+");
-		// 	fclose(f);
-		// 	buffer_write(&sz, 0, sizeof(size_t), filename);
-		// }
-
 		void init() {
 			buffer_read(&sz, 0, sizeof(size_t), filename);
 		}
@@ -44,7 +37,6 @@ namespace SJTU {
 		}
 
 		T operator[](const size_t &index) const {
-			// std::cerr << "--test debug--"<< index << " " << sz << std::endl;
 			if (index < 0 || index >= sz) throw index_out_of_bound();
 			T result;
 			buffer_read(&result, sizeof(size_t) + index * sizeof(T), sizeof(T), filename);

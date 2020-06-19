@@ -8,13 +8,13 @@ namespace sjtu{
 	char loginlist[] = "loginlist";
 	class user_related{
 	private:
-		bptree<USERNAME, user> usertree;
-	   // vector<pair<USERNAME, PRIVILEGE> >login_list;
-	    SJTU::file_vector<pair<USERNAME, PRIVILEGE> , loginlist> login_list;  
+	    SJTU::file_vector<pair<USERNAME, PRIVILEGE> , loginlist> login_list;
+		bptree<USERNAME, user> usertree;  
 	public:
 		user_related():usertree("usertree", "userindex"), login_list(){}
+		~user_related() = default;
 	    int add_user(const USERNAME &Username, const PASSWORD &Password, const NAME &Name, const MAILADDR &MailAddr, PRIVILEGE Privilege){
-	    	int success = usertree.count(Username);
+			int success = usertree.count(Username);
 	    	if(success == 1) return -1;
 	    	else{
 	    		usertree.insert(Username, user(Password, Name, MailAddr, Privilege));
@@ -28,6 +28,7 @@ namespace sjtu{
 			return false;
 		}
 		int add_user(const USERNAME &Username1, const USERNAME &Username2, const PASSWORD &Password, const NAME &Name, const MAILADDR &MailAddr, PRIVILEGE Privilege){
+		
 			int i;
 			if(login_list.size() == 0) return -1;
 			for(i = 0; i < login_list.size(); ++i){
@@ -36,12 +37,9 @@ namespace sjtu{
 			}
 			if(login_list[i].second <= Privilege) return -1;
 	    	int success = usertree.count(Username2);
-	    //	std::cout << usertree.count(string<20>("Croissant")) << "WWW" << std::endl;
-	    //	std::cout << Username1 << std::endl;
 	    	if(success == 1) return -1;
 	    	else{
 	    		usertree.insert(Username2, user(Password, Name, MailAddr, Privilege));
-	    //		std::cout << usertree.count(string<20>("Croissant")) << "WWW" << std::endl;
 	    		return 0;
 			}
 		} 
@@ -91,7 +89,6 @@ namespace sjtu{
 				if(Privilege != invalid_privilege){
 					tmp.modify_privilege(Privilege);
 					for(int i = 0; i < login_list.size(); ++i){
-				//		if(login_list[i].first == Username2) login_list[i].second = Privilege; 
 				        if(login_list[i].first == Username2) login_list.modify(i, pair<USERNAME, PRIVILEGE>(Username2, Privilege));
 					}
 				}
@@ -101,9 +98,7 @@ namespace sjtu{
 		}
 		inline void exit(){
 			login_list.clean();
-//			cleaned = true;
 			login_list.init();
-//			cleaned = false;
 		}	
 	};
 }

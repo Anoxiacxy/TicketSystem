@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <cstring>
-#include "find_blank.hpp"
+#include "file_vector.hpp"
 #include "exceptions.hpp"
 #include "utility.hpp"
 #include "memory_pool.hpp"
@@ -15,6 +15,7 @@ namespace sjtu
 	template <class Key, class value_t, size_t K = 4096, class Compare = std::less<Key>>
 	class bptree
 	{
+	public:
 		typedef char* buffer_pointer;
 		typedef char buffer[K];
 
@@ -244,29 +245,46 @@ namespace sjtu
 		}
 
 		node insert(node &x, Key key, value_t value, bool &is_change) {
+//			std::cout << "QQQ1" << std::endl;
 			if (x.is_leaf) {
+//				std::cout << "QQQ2" << std::endl;
 				buffer b;
 				buffer_load_leaf(b, x);
+//				std::cout << "QQQ100" << std::endl;
 				node new_node = buffer_insert_leaf(b, x, key, value, is_change);
+//				std::cout << "QQQ3" << std::endl;
 				return new_node;
 			} else {
+//				std::cout << "QQQ4" << std::endl;
 				buffer b;
+//				std::cout << "QQQ5" << std::endl;
 				buffer_load_node(b, x);
+//				std::cout << "QQQ6" << std::endl;
 				size_t pos = find_node_pos(b, key, x.size);
+//				std::cout << "QQQ7" << std::endl;
 				if (!equal_key(key, *get_node_key(b, pos)) && pos > 0) --pos;
+//				std::cout << "QQQ8" << std::endl;
 				if (pos == x.size) --pos;
+//				std::cout << "QQQ9" << std::endl;
 				off_t pre_son = *get_node_son(b, pos);
+//				std::cout << "QQQ10" << std::endl;
 				node pre_son_node = get_node(pre_son);
+//				std::cout << "QQQ11" << std::endl;
 				node new_node = insert(pre_son_node, key, value, is_change);
+//				std::cout << "QQQ12" << std::endl;
 				if (is_change) return x;
 				if (new_node.pos != pre_son_node.pos) {
+//					std::cout << "QQQ13" << std::endl;
 					node alter_node = buffer_insert_node(b, x, new_node.key, new_node.pos, pos + 1);
+//					std::cout << "QQQ14" << std::endl;
 					return alter_node;
 				} else {
+//					std::cout << "QQQ15" << std::endl;
 					*get_node_key(b, pos) = pre_son_node.key;
 					x.key = *get_node_key(b, 0);
 					save_node(x);
 					buffer_save_node(b, x);
+//					std::cout << "QQQ16" << std::endl;
 					return x;
 				}
 			}
@@ -670,16 +688,12 @@ namespace sjtu
 		bptree(const char *fname, const char *in_file) : 
 			leaf_size((K - sizeof(node)) / (sizeof(Key) + sizeof(value_t)) - 1),
 			node_size((K - sizeof(node)) / (sizeof(Key) + sizeof(value_t)) - 1)
-			// leaf_size(50), node_size(50)
 		{
-			// std::cerr << "fucking" << std::endl;
 			filename = new char[strlen(fname) + 1];
 			strcpy(filename, fname);
 			index_file = new char[strlen(in_file) + 1];
 			strcpy(index_file, in_file);
-			std::cerr << "fucking" << std::endl;
 			finder.init(in_file);
-			std::cerr << "fucking" << std::endl;
 			FILE *file = fopen(filename, "rb+");
 			// std::cerr << "fucking" << std::endl;
 			if (!file) init();
@@ -692,15 +706,10 @@ namespace sjtu
 		}
 
 		~bptree() {
-			// std::cerr << "testing" << std::endl;
 			finder.save_info();
-			// std::cerr << "testing" << std::endl;
 			save_info();
-			// std::cerr << "testing" << std::endl;
 			if (filename) delete filename;
-			// std::cerr << "testing" << std::endl;
 			if (index_file) delete index_file;
-			// std::cerr << "testing" << std::endl;
 		}
 
 		void clear() {
@@ -972,7 +981,6 @@ namespace sjtu
 			if (result.pos != x.pos) {
 				buffer b;
 				node new_root(finder.m_alloc(), invalid_off, invalid_off, false);
-				// buffer_load_node(b, new_root);
 				root = new_root.pos;
 				*get_node_key(b, 0) = x.key;
 				*get_node_son(b, 0) = x.pos;

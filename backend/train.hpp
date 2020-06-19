@@ -3,7 +3,6 @@
 
 #include "string.hpp"
 #include "typedef.hpp"
-#include "segement_tree.hpp"
 namespace sjtu{
 	int cmp_date(const string<5> &date1, const string<5> &date2){
 		int Month1 = (date1[0] - '0') * 10 + date1[1] - '0';
@@ -113,66 +112,19 @@ namespace sjtu{
 	public: //除了trainID的其他信息 
 		int stationNum = 0;
 		string<20> *stations;
-//		int *prices;
 		string<5> startTime;
-//		int *travelTimes;
-//		int *stopoverTimes;
 		string<5> saleDate_from;
 		string<5> saleDate_to;  
 		char type;
-//		segement_tree *seat_num;
 		bool release = false;
 		int seatnum;
 		int pos1;
 		int pos2;
 	public:
 		train() = default;
-	    train(int StationNum, string<20> *Stations, int *Prices, const string<5> &StartTime, int *TravelTimes, int *StopoverTimes, const string<5> &SaleDate_from, const string<5> &SaleDate_to, char Type, int SeatNum, int Pos1, int Pos2):stationNum(StationNum), startTime(StartTime), saleDate_from(SaleDate_from), saleDate_to(SaleDate_to), type(Type), seatnum(SeatNum), pos1(Pos1), pos2(Pos2){
-//	    	stations = new string<20>[stationNum];
-//	    	prices = new int[stationNum]; //空出首位 
-//	    	travelTimes = new int[stationNum]; //空出数组首位置，从后一位开始记录
-//			stopoverTimes = new int[stationNum]; //空出首位和末位 
-//			int Date_interval = minus_date(saleDate_from, saleDate_to) + 1;
-//			seat_num = new segement_tree[Date_interval];
-//			int initial_data[stationNum];
-//			for(int i = 1; i < stationNum; ++i) initial_data[i] = SeatNum;
-//			segement_tree tmp(initial_data, stationNum - 1);
-//			for(int i = 0; i < Date_interval; ++i){
-//				seat_num[i] = tmp;
-//			}
-//	    	for(int i = 0; i < stationNum; ++i){
-//	    		stations[i] = Stations[i];
-//				travelTimes[i] = TravelTimes[i];
-//				stopoverTimes[i] = StopoverTimes[i];
-//				prices[i] = Prices[i];		
-//			}
-		}
-		train(const train &other):stationNum(other.stationNum), startTime(other.startTime), saleDate_from(other.saleDate_from), saleDate_to(other.saleDate_to), type(other.type), release(other.release), seatnum(other.seatnum), pos1(other.pos1), pos2(other.pos2){
-//			stations = new string<20>[stationNum];
-//	    	prices = new int[stationNum]; 
-//	    	travelTimes = new int[stationNum]; 
-////			stopoverTimes = new int[stationNum]; 
-	//		int Date_interval = minus_date(saleDate_from, saleDate_to) + 1;
-	//		seat_num = new segement_tree[Date_interval];
-	//		for(int i = 0; i < Date_interval; ++i){
-	//			seat_num[i] = other.seat_num[i];
-	//		}
-	//    	for(int i = 0; i < stationNum; ++i){
-	  //  		stations[i] = other.stations[i];
-		//		travelTimes[i] = other.travelTimes[i];
-		//		stopoverTimes[i] = other.stopoverTimes[i];
-		//		prices[i] = other.prices[i];		
-		//	}
-		}
-		~train(){
-		//	if(stationNum != 0){
-		//	    delete [] stations;
-		//	    delete [] travelTimes;
-		//	    delete [] stopoverTimes;
-		//	    delete [] seat_num;
-		//	    delete [] prices;
-		  //  }
-		}
+	    train(int StationNum, const string<5> &StartTime, const string<5> &SaleDate_from, const string<5> &SaleDate_to, char Type, int SeatNum, int Pos1, int Pos2):stationNum(StationNum), startTime(StartTime), saleDate_from(SaleDate_from), saleDate_to(SaleDate_to), type(Type), seatnum(SeatNum), pos1(Pos1), pos2(Pos2){}
+		train(const train &other):stationNum(other.stationNum), startTime(other.startTime), saleDate_from(other.saleDate_from), saleDate_to(other.saleDate_to), type(other.type), release(other.release), seatnum(other.seatnum), pos1(other.pos1), pos2(other.pos2){}
+		~train(){}
 		train &operator = (const train& other){
 			new(this)train(other);
 			return *this;
@@ -189,101 +141,6 @@ namespace sjtu{
 		inline string<5> &get_saleDate_to(){
 			return saleDate_to;
 		}
-/*		void print(const string<5> &date){
-			std::cout << type << std::endl;
-			int date_gap = 0;
-			int date_fix = 0;
-			string<5> arriving_time = startTime;
-			string<5> leaving_time = startTime;
-			string<5> arriving_date = date;
-			string<5> leaving_date = date;
-			int price = 0;
-			int date_interval = minus_date(saleDate_from, date);
-			std::cout << stations[0] << " xx-xx" << " xx:xx" << " -> " << date << " " << leaving_time << " " << price << " " << seat_num[date_interval].query(1, 1, stationNum - 1, 1) << std::endl; 
-			price += prices[1];
-			pair<int, string<5> > tmpTime1 = add_time(leaving_time, travelTimes[1]);
-			date_fix += tmpTime1.first;
-			pair<int, string<5> > tmpTime3 = add_time(leaving_time, travelTimes[1] + stopoverTimes[1]);
-			date_gap = tmpTime3.first - tmpTime1.first;
-			arriving_date = add_date(leaving_date, tmpTime1.first);
-			leaving_date = add_date(arriving_date, date_gap);
-			arriving_time = tmpTime1.second;
-			leaving_time = tmpTime3.second;
-			for(int i = 1; i < stationNum - 1; ++i){
-				std::cout << stations[i] << " " << arriving_date << " " << arriving_time << " -> " << leaving_date << " " << leaving_time << " " << price << " " << seat_num[date_interval].query(i + 1, 1, stationNum - 1, 1) << std::endl;
-			    price += prices[i + 1];
-			    pair<int, string<5> > tmpTime = add_time(leaving_time, travelTimes[i + 1]);
-				date_fix += tmpTime.first;
-				pair<int, string<5> > tmpTime2 = add_time(leaving_time, travelTimes[i + 1] + stopoverTimes[i + 1]);
-				date_gap = tmpTime2.first - tmpTime.first;
-				arriving_date = add_date(leaving_date, tmpTime.first);
-				leaving_date = add_date(arriving_date, date_gap);
-				arriving_time = tmpTime.second;
-				leaving_time = tmpTime2.second;
-			}
-			std::cout << stations[stationNum - 1] << " " << arriving_date << " " << arriving_time << " -> xx-xx" << " xx:xx " << price <<  " x\n";
-		} */
-/*		route query_route(const string<5> &Date, const string<20> &Leaving_station, const string<20> &Arriving_station){
-			int date_gap = 0;
-			int date_fix = 0;
-			string<5> arriving_time = startTime;
-			string<5> leaving_time = startTime;
-			int price = 0;
-			int date_fix2 = 0;
-			int date_gap1, date_fix1, price1;
-			string<5> leaving_time1;
-			int tmp1 = -1; 
-			int tmp2;
-			for(int i = 0; i < stationNum; ++i){
-				if(stations[i] == Leaving_station){
-					date_gap1 = date_gap;
-					date_fix1 = date_fix2;
-					price1 = price;
-					leaving_time1 = leaving_time;
-					tmp1 = i;
-				}
-				if(stations[i] == Arriving_station){
-					tmp2 = i;
-					if(tmp1 == -1){
-						return route();
-					}
-					break;
-				}
-				if(i == stationNum - 1){
-					return route();
-				}
-			    price += prices[i + 1];
-			    pair<int, string<5> > tmpTime = add_time(leaving_time, travelTimes[i + 1]);
-				date_fix += tmpTime.first;
-				date_fix2 = date_fix;
-				pair<int, string<5> > tmpTime2 = add_time(leaving_time, travelTimes[i + 1] + stopoverTimes[i + 1]);
-				date_gap = tmpTime2.first - tmpTime.first;
-				date_fix += date_gap;
-				arriving_time = tmpTime.second;
-				leaving_time = tmpTime2.second;
-			}
-			return route(Date, tmp1, tmp2, leaving_time1, arriving_time,  date_fix1 + date_gap1, date_fix2 - date_fix1 - date_gap1, date_fix1 + date_gap1, price - price1);
-		}
-		inline bool query_ticket(int num1, int num2, const string<5> &Date, int TicketNum){
-			int date_interval = minus_date(saleDate_from, Date);
-			int data = seat_num[date_interval].query(num1 + 1, num2, 1, stationNum - 1, 1);
-			if(TicketNum <= data){
-				seat_num[date_interval].update(num1 + 1, num2, 1, stationNum - 1, 1, -TicketNum);
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-		inline void refund_ticket(int num1, int num2, const string<5> &Date, int TicketNum){
-			int date_interval = minus_date(saleDate_from, Date);
-			seat_num[date_interval].update(num1 + 1, num2, 1, stationNum - 1, 1, TicketNum);
-		}
-		
-		inline int query_seat(int num1, int num2, const string<5> &Date){
-			int date_interval = minus_date(saleDate_from, Date);
-			return seat_num[date_interval].query(num1 + 1, num2, 1, stationNum - 1, 1);
-		}*/
 	};
 }
 
