@@ -2,7 +2,7 @@
 #include <cstdio>
 #include <cstddef>
 #include <cstring>
-#include "file_vector.hpp"
+#include "find_blank.hpp"
 #include "exceptions.hpp"
 #include "utility.hpp"
 #include "memory_pool.hpp"
@@ -230,7 +230,7 @@ namespace sjtu
 			adjust_leaf(b, x, t);
 			*get_leaf_key(b, t) = key;
 			*get_leaf_value(b, t) = value;
-			x.key = *get_leaf_key(b, 0);
+			x.key = *get_leaf_key(b, 0); // fuck
 			++x.size;
 			save_node(x);
 			is_change = false;
@@ -316,7 +316,7 @@ namespace sjtu
 			}
 			delete_node(x);
 			save_node(y);
-			buffer_save_node(by, y);
+			buffer_save_leaf(by, y);
 		}
 
 		void merge_right_leaf(buffer_pointer bx, node &x, node &y) {
@@ -335,7 +335,7 @@ namespace sjtu
 			}
 			delete_node(y);
 			save_node(x);
-			buffer_save_node(bx, x);
+			buffer_save_leaf(bx, x);
 		}
 
 		void buffer_erase_node(buffer_pointer b, node &x, Key key) {
@@ -677,11 +677,9 @@ namespace sjtu
 			strcpy(filename, fname);
 			index_file = new char[strlen(in_file) + 1];
 			strcpy(index_file, in_file);
-
-			// std::cerr << "fucking" << std::endl;
+			std::cerr << "fucking" << std::endl;
 			finder.init(in_file);
-			
-			// std::cerr << "fucking" << std::endl;
+			std::cerr << "fucking" << std::endl;
 			FILE *file = fopen(filename, "rb+");
 			// std::cerr << "fucking" << std::endl;
 			if (!file) init();
@@ -694,10 +692,15 @@ namespace sjtu
 		}
 
 		~bptree() {
+			// std::cerr << "testing" << std::endl;
 			finder.save_info();
+			// std::cerr << "testing" << std::endl;
 			save_info();
+			// std::cerr << "testing" << std::endl;
 			if (filename) delete filename;
+			// std::cerr << "testing" << std::endl;
 			if (index_file) delete index_file;
+			// std::cerr << "testing" << std::endl;
 		}
 
 		void clear() {
@@ -1089,9 +1092,7 @@ namespace sjtu
 				else {
 					if (t == x.size) {
 						if (x.pos != tail) return ++iterator(x, t - 1, this);
-						else {
-							return iterator(node(invalid_off, invalid_off, invalid_off, true), 0, this);
-						}
+						else return iterator(node(invalid_off, invalid_off, invalid_off, true), 0, this);
 					}
 					else return iterator(x, t, this);
 				}
