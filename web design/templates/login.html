@@ -15,6 +15,9 @@
     }
   </style>
   <script>
+  $.fn.form.settings.rules.startWithChar = function(value) {
+    return value[0]
+  };
   $(document)
     .ready(function() {
       $('.ui.form')
@@ -25,11 +28,7 @@
               rules: [
                 {
                   type   : 'empty',
-                  prompt : 'Please enter your username'
-                },
-                {
-                  type   : 'maxLength[20]',
-                  prompt : 'Your username is too long'
+                  prompt : '请输入你用户名'
                 }
               ]
             },
@@ -38,15 +37,7 @@
               rules: [
                 {
                   type   : 'empty',
-                  prompt : 'Please enter your password'
-                },
-                {
-                  type   : 'minLength[6]',
-                  prompt : 'Your password must be at least 6 characters'
-                }
-                {
-                  type   : 'maxLength[30]',
-                  prompt : 'Your password is too long'
+                  prompt : '请输入你的密码'
                 }
               ]
             }
@@ -64,32 +55,36 @@
     <h2 class="ui image header">
       <i class="circular train icon"></i>
       <div class="content">
-        Login to your account
+        请登录您的账户
       </div>
     </h2>
-    <form class="ui large form" method="post" onsubmit="
-    document.getElementById('LoginButton').classList.add('loading');">
+    <form class="ui large form" method="post">
       <div class="ui segment">
         <div class="field">
           <div class="ui left icon input">
-            <input type="text" name="username" placeholder="Username">
+            <input type="text" name="username" placeholder="用户名">
             <i class="user icon"></i>
           </div>
         </div>
         <div class="field">
           <div class="ui left icon input">
-            <input type="password" name="password" placeholder="Password">
+            <input type="password" name="password" placeholder="密码">
             <i class="lock icon"></i>
           </div>
         </div>
-        <div class="ui fluid primary submit button" id="LoginButton">Login</div>
+        <div class="ui fluid primary submit button">登陆</div>
       </div>
       <div class="ui error message"></div>
     </form>
     <div class="ui center aligned segment">
-      New to us? <a href="#">Sign Up</a>
+      还没有账号? <a href="#">点此注册</a>
     </div>
   </div>
 </div>
-  
+<script>
+{% if 'C_USERNAME' in argv %}  
+  $('input[name="username"]').val('{{ argv.C_USERNAME }}')
+{% endif %}
+</script>
+
 {% endblock %}

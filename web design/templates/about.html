@@ -1,11 +1,63 @@
 {% extends 'base.html' %}
 {% block title %}
-
+<title>12306 | 关于</title>
 {% endblock %} 
 {% block head %}
 
 {% endblock %}
 
 {% block content %}
-
+<div class="ui three column padded centered grid">
+    <div class="colume">
+        <div class="ui card">
+            <div class="image">
+              <img src="{{ url_for('static', filename='images/avatar/cxy.jpg') }}">
+            </div>
+            <div class="content">
+              <a class="header">陈雪阳</a>
+              <div class="meta">
+                <span class="date">2013年加入</span>
+              </div>
+              <div class="description">Krisasdty is an art director living in New York. </div>
+            </div>
+            <div class="extra content">
+              <a><i class="user icon"></i> 前端 </a>
+            </div>
+        </div>
+    </div>
+    <div class="colume">
+        <div class="ui card">
+            <div class="image">
+              <img src="{{ url_for('static', filename='images/avatar/lzd.jpg') }}">
+            </div>
+            <div class="content">
+              <a class="header">李至丹</a>
+              <div class="meta">
+                <span class="date">2013年加入</span>
+              </div>
+              <div class="description">Kristy is an art director living in New York. </div>
+            </div>
+            <div class="extra content">
+              <a><i class="user icon"></i> 数据库 </a>
+            </div>
+        </div>
+    </div>
+    <div class="colume">
+        <div class="ui card">
+            <div class="image">
+              <img src="{{ url_for('static', filename='images/avatar/yxy.jpg') }}">
+            </div>
+            <div class="content">
+              <a class="header">杨新宇</a>
+              <div class="meta">
+                <span class="date">2013年加入</span>
+              </div>
+              <div class="description">Kristy is an art director living in New York. </div>
+            </div>
+            <div class="extra content">
+              <a><i class="user icon"></i> 后端 </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

@@ -8,6 +8,8 @@
 #include <pthread.h> 
 #include "../../backend/interpreter.hpp"
 
+using namespace sjtu;
+
 #define MAXBUFF 4096
 
 template<class Interpret>
