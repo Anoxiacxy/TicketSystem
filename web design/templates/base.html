@@ -20,8 +20,8 @@
     <script>
       map.set('{{var}}', '{{ argv[var] }}')
     </script>
-
     {% endfor %}
+
     {% block title %}
     <title>Tickey System Base Html</title>
     {% endblock %}
@@ -35,20 +35,35 @@
             <i class="train icon"></i>
             12307 火车票管理系统
           </div>
+          
           <a href="/" class="item">首页</a>
+          <a href="/buy_ticket" class="item">购票</a>
+          {% if 'IS_MANAGER' in argv %}
+            <a href="/user_manage" class="item">用户管理</a>
+            <a href="/train_manage" class="item">车次管理</a>
+          {% endif %}
           <a href="/about" class="item">关于</a>
           <div class="right menu">
-            {% if 'C_NAME' not in argv %}
+            {% if 'IS_MANAGER' in argv %}
+              <a href="javascript:;" class="item" onclick="$('#terminal').modal('show')">终端</a>
+            {% endif %}
+            {% if 'IS_LOGED_IN' not in argv %}
             <a href="/login" class="item">登陆</a>
-            <a href="#" class="item">注册</a>
+            <a onclick="$('#terminal').modal('show')" class="item">注册</a>
             <div class="item">
               <i class="large user icon"></i>
             </div>
             {% else %}
+            
             <a href="/logout" class="item">注销</a>
-            <a href="/profile" class="item">
-              <img id='avatar' class="ui circular image" width=26 height=26>
-            </a>
+            <div class="ui top right pointing dropdown item">
+                <img id='avatar' class="ui circular image" width=26 height=26>
+                <i class="dropdown icon"></i>
+                <div class="menu">
+                  <a href="/profile" class="item"><i class="user icon"></i>个人信息</a>
+                  <a href="/orders" class="item"><i class="ticket alternate icon"></i>我的订单</a>
+                </div>
+            </div>
             <script>
               $('#avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5('{{ argv.C_MAILADDR }}') + '?s=26&d=identicon&r=g');
             </script>
@@ -68,38 +83,52 @@
         <div class="ui center aligned container">
           <div class="ui stackable divided grid">
             <div class="three wide column">
-              <h4 class="ui inverted header">Group 1</h4>
+              <h4 class="ui inverted header">开发团队</h4>
               <div class="ui inverted link list">
-                <a href="#" class="item">Link One</a>
+                <a href="#" class="item">杨新宇</a>
+                <a href="#" class="item">李至丹</a>
+                <a href="#" class="item">陈雪阳</a>
               </div>
             </div>
             <div class="three wide column">
-              <h4 class="ui inverted header">Group 2</h4>
+              <h4 class="ui inverted header">代码仓库</h4>
               <div class="ui inverted link list">
-                <a href="#" class="item">Link One</a>
+                <a href="https://anoxiacxy.github.io/TicketSystem/" class="item"><i class="github icon"></i></a>
               </div>
             </div>
             <div class="three wide column">
-              <h4 class="ui inverted header">Group 3</h4>
+              <h4 class="ui inverted header">站点地图</h4>
               <div class="ui inverted link list">
-                <a href="#" class="item">Link One</a>
+                <a href="/profile" class="item">个人信息</a>
+                <a href="/orders" class="item">订单管理</a>
+                <a href="/buy_ticket" class="item">购买车票</a>
               </div>
             </div>
             <div class="seven wide column">
-              <h4 class="ui inverted header">Footer Header</h4>
-              <p>Extra space for a call to action inside the footer that could help re-engage users.</p>
+              <h4 class="ui inverted header">12307 火车票管理系统</h4>
+              <p>自由创建一辆列车，自由退订一张车票</p>
+              <p>Copyright © 2020 </p>
             </div>
           </div>
-          <div class="ui section divider"></div>
-          <div class="ui horizontal inverted small divided link list">
-            <a class="item" href="#">Site Map</a>
-            <a class="item" href="#">Contact Us</a>
-            <a class="item" href="#">Terms and Conditions</a>
-            <a class="item" href="#">Privacy Policy</a>
+          <div class="ui divider"></div>
+          <div class="ui horizontal link list">
+            <a href="#"></a>
           </div>
         </div>
       </div>
-      
+      <div class="ui modal" id="terminal">
+        <div class="header">管理员终端</div>
+        <div class="scrolling content">
+          <div class="ui fluid transparent action input">
+            <input type="text" name="command_input" placeholder="请输入命令">
+            <button class="ui icon button" onclick="send_command()"><i class="reply icon" ></i></button>
+          </div>
+
+          <div class="ui horizontal divider"></div>
+          <div id="history"></div>
+
+        </div>
+      </div>
       <div class="ui modal" id="modal">
         <i class="close icon"></i>
         <div class="header" id="modal_header">{{ argv.modal_header }}</div>
@@ -109,9 +138,40 @@
         </div>
       </div>
       <script async>
+        $('.ui.dropdown').dropdown();
         {% if 'show_modal' in argv %}
           $('#modal').modal('show');
-        {% endif %}    
+        {% endif %}
+
+        function send_command() {
+          command = $('input[name="command_input"]').val()
+          $('input[name="command_input"]').val('')
+          document.getElementById('history').innerHTML = "<p><code>" + command + "</code></p>" + document.getElementById('history').innerHTML;
+          
+          var data = {
+            data:JSON.stringify({
+              'command':command
+            })
+          }
+
+          $.ajax({
+            url:"{{ url_for('ajax_terminal') }}",
+            type:"post",
+            data:data,
+            dataType: 'json',
+            success:function(data){
+              if (data["result"] == "success") {
+                var response = data['response'];
+                document.getElementById('history').innerHTML = "<p><code>" + response + "</code></p>" + document.getElementById('history').innerHTML;
+              } else {
+                document.getElementById('history').innerHTML = "<p><code>" + "无效命令" + "</code></p>" + document.getElementById('history').innerHTML;
+              }
+            },
+            error:function(e){
+              document.getElementById('history').innerHTML = "<p><code>" + "未连接到服务器" + "</code></p>" + document.getElementById('history').innerHTML;
+            }
+          })
+        }
       </script>
 </body>
 </html>

@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% block title %}
+<title>12307 | 我的订单</title>
+{% endblock %} 
+{% block head %}
+
+{% endblock %} 
+{% block content %}
+<div class="ui text container">
+  <div class="ui grid">
+    <div class="sixteen wide column">
+      <div class="ui segment">
+        <i class="big filter icon"></i>
+        <span class="ui labels" id="dropdown">
+          
+        </span>
+      </div>
+    </div>
+    <div class="ten wide column">
+      <div class="ui segment">
+        <div class="ui one cards" id="train_list">
+          
+        </div>
+      </div>
+    </div>
+    <div class="six wide column">
+      <div class="ui center aligned segment">
+        <div class="ui horizontal divider"><i class="map marker icon"></i>起始站点</div>
+        <div class="ui search">
+          <div class="ui fluid action left icon input">
+            <i class="search icon"></i>
+            <input class="prompt" type="text" placeholder="搜索站点……" style="border-radius:0px;" id="other_item">
+            <button class="ui floating dropdown icon button"><i class="angle down icon"></i>
+              <div class="menu">
+                <a class="item" onclick="add_position_item('FROM')">设为起点</a>
+                <a class="item" onclick="add_position_item('TO')">设为终点</a>
+              </div>
+            </button>
+          </div>
+          <div class="results"></div>
+        </div>
+        <br>
+        <div class="ui horizontal divider"><i class="tags icon"></i> 订单状态</div>
+        <div class="ui labels">
+          <a class="ui label" onclick="add_STATUS_item('success', '购买成功', 'green'); this.style.display='none';" id="STATUS success"><div class="ui green empty circular label"></div> 购买成功</a>
+          <a class="ui label" onclick="add_STATUS_item('pending', '候补购票', 'yellow'); this.style.display='none';" id="STATUS pending"><div class="ui yellow empty circular label"></div> 候补购票</a>
+          <a class="ui label" onclick="add_STATUS_item('refunded', '已经退票', 'red'); this.style.display='none';" id="STATUS refunded"><div class="ui red empty circular label"></div> 已经退票</a>
+        </div>
+        <br>
+        <div class="ui horizontal divider"><i class="time icon"></i> 发车时间</div>
+        <div class="ui fluid action input">
+          <input type="date" class="prompt" name="ticket_date">
+          <button class="ui icon button" onclick="add_time_item()"><i class="plus circle icon"></i></button>
+        </div>
+        <br>
+        <div class="ui fluid buttons">
+          <button class="ui negative basic button" onclick="clear_all_items()">重置筛选项</button>
+          <button class="ui positive basic button" onclick="reload_query_order()">刷新</button>
+        </div>
+      </div>
+      <div class="ui negative message" id="negative_message">
+        <i class="close icon" onclick="this.parentNode.style.display='none'"></i>
+        <div class="header" id="negative_message_header"></div>
+        <p id="negative_message_content"></p>
+      </div>
+      <div class="ui positive message" id="positive_message">
+        <i class="close icon" onclick="this.parentNode.style.display='none'"></i>
+        <div class="header" id="positive_message_header"></div>
+        <p id="positive_message_content"></p>
+      </div>
+    </div>
+  </div>    
+</div>
+<script src="{{ url_for('static', filename='city_name.js') }}"></script>
+<script>
+  hide_message();
+  function hide_message() {
+    document.getElementById('negative_message').style.display="none";
+    document.getElementById('positive_message').style.display="none";
+  }
+  function show_message(header, content, is_positive) {
+    if (is_positive) {
+      document.getElementById('positive_message_header').innerText=header;
+      document.getElementById('positive_message_content').innerText=content;
+      document.getElementById('positive_message').style.display="block";
+      document.getElementById('negative_message').style.display="none";
+    } else {
+      document.getElementById('negative_message_header').innerText=header;
+      document.getElementById('negative_message_content').innerText=content;
+      document.getElementById('negative_message').style.display="block";
+      document.getElementById('positive_message').style.display="none";
+    }
+  }
+  
+  var cities = getCities();
+  $('.ui.search').search({
+      type: 'category',
+      source: cities,
+    });
+  function add_STATUS_item(value, item, color) {
+    var item_html = '<a class="ui label" name="STATUS ' + value + '" style="display: inline-block !important;" onclick="this.style.display=\'none\'; reload_order(); document.getElementById(\'STATUS ' + value + '\').style.display=\'\'"><div class="ui ' + color + ' empty circular label"></div>'+ item + '<i class="delete icon"></i></a>'
+    document.getElementById('dropdown').innerHTML += item_html;
+    reload_order();
+  }
+  function add_position_item(where) {
+    var item = document.getElementById('other_item').value;
+    if (item == "") return;
+    document.getElementById('other_item').value = "";
+    var item_html = '<a class="ui label" name="'+ where + ' ' + item + '" style="display: inline-block !important;" onclick="this.style.display=\'none\'; reload_order()">'+ (where == "TO" ? '<b>抵达</b>' : '') + item 
+      + (where == "FROM" ? '<strong>出发</strong>' : '') + '<i class="delete icon"></i></a>'
+    document.getElementById('dropdown').innerHTML += item_html;
+    reload_order();
+  }
+  function add_time_item() {
+    var item = $('input[name="ticket_date"]').val().substring(5);
+    if (item == "") return
+    $('input[name="ticket_date"]').val('');
+    var item_html = '<a class="ui label" name="time ' + item + '" style="display: inline-block !important;" onclick="this.style.display=\'none\'; reload_order()">'+ item.substr(0, 2) + "月" + item.substr(3, 2) + "日"  + '<i class="delete icon"></i></a>'
+    document.getElementById('dropdown').innerHTML += item_html;
+    reload_order();
+  }
+  function clear_all_items() {
+    document.getElementById('dropdown').innerHTML = "";
+    reload_order();
+  }
+  indexs = []
+  orders = []
+  function get_index() {
+    indexs = []
+    items = document.getElementById('dropdown').childNodes;
+    for (var i in orders) {
+      
+      var time_count = 0;
+      var ok_time = 0;
+      var FROM_count = 0;
+      var ok_FROM = 0;
+      var TO_count = 0;
+      var ok_TO = 0;
+      var STATUS_count = 0;
+      var ok_STATUS = 0;
+      for (var j = 1; j < items.length; j++) {
+        if (items[j].style.display!="none") {
+          str = items[j].name;
+          strs = str.split(' ');
+          if (strs[0] == 'time') {
+            time_count++;
+            if (orders[i]["LEAVING_TIME"].substr(0, 5) == strs[1])
+              ok_time++;
+          } else if (strs[0] == 'FROM') {
+            FROM_count++;
+            if (orders[i]['FROM'] == strs[1])
+              ok_FROM++;
+          } else if (strs[0] == 'TO') {
+            TO_count++;
+            if (orders[i]['TO'] == strs[1])
+              ok_TO++;
+          } else if (strs[0] == 'STATUS') {
+            STATUS_count++;
+            if (orders[i]['STATUS'] == strs[1])
+              ok_STATUS++;
+          }
+        }
+      }
+      ok = true;
+      if (time_count != 0 && ok_time == 0)
+        ok = false;
+      if (FROM_count != 0 && ok_FROM == 0)
+        ok = false;
+      if (TO_count != 0 && ok_TO == 0)
+        ok = false;
+      if (STATUS_count != 0 && ok_STATUS == 0)
+        ok = false;
+      if (ok)
+        indexs.push(i);
+    }
+  }
+
+  function CN_STATUS(STATUS) {
+    if (STATUS == 'success') 
+      return '购买成功';
+    else if (STATUS == 'pending')
+      return '候补购票';
+    else  
+      return '已经退票';
+  }
+
+  function COLOR_STATUS(STATUS) {
+    if (STATUS == 'success') 
+      return 'green';
+    else if (STATUS == 'pending')
+      return 'yellow';
+    else  
+      return 'red';
+  }
+
+  function reload_order() {
+    get_index();
+    show_message("查询成功", "共搜索到 " + indexs.length + " 条符合条件的订单！", true);
+    var train_list = document.getElementById('train_list');
+    if (indexs.length == 0) {
+      item_html = "<div class='card'><div class='center aligned content'>筛选条件过多！我们找不到任何满足条件的订单<br>请尝试删除一些筛选条件，或者<a href='javascript:;' onclick='clear_all_items()'>重置筛选项</a></div></div>"
+      train_list.innerHTML = item_html;
+      return;
+    }
+    train_list.innerHTML = "";
+    for (var i in indexs) {
+      var item = orders[indexs[i]];
+      var item_html = '<div class="card"><div class="content"><div class="ui header">'+ item['trainID'] +'</div><div class="ui divider"></div><div class="ui center aligned grid"><div class="eight wide column"><div class="ui tiny statistic"><div class="value" id="finish_0_LEAVING_TIME">'+ item['LEAVING_TIME'] +'</div><div class="label"><div class="meta">'+ item['FROM'] +'</div>出发</div></div></div><div class="eight wide column"><div class="ui tiny statistic"><div class="value" id="finish_0_ARRIVING_TIME">'+ item['ARRIVING_TIME'] +'</div><div class="label">抵达<div class="meta" id="finish_0_TO">'+ item['TO'] +'</div></div></div></div></div></div><div class="extra content"><div class="ui three column center aligned grid"><div class="column"><button class="ui mini '+ COLOR_STATUS(item['STATUS']) +' fluid button" id="finish_0_STATUS">'+ CN_STATUS(item['STATUS']) +'</button></div><div class="column">购买 ：<span id="finish_0_COUNT">'+ item['NUM'] +'</span>张</div><div class="column"><button class="ui '+ (COLOR_STATUS(item['STATUS']) == "red" ? 'disabled' : '') +' mini red basic fluid button" onclick="refund_ticket('+ i +')">退票</button></div></div></div></div>'
+      train_list.innerHTML += item_html;
+    }
+  }
+  function refund_ticket(index) {
+    var data = {
+      data:JSON.stringify({
+        '-u':map.get('C_USERNAME'),
+        '-n':(index + 1) + '',
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_refund_ticket') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          show_message("退票成功", "你可以继续管理您的订单！", true);
+          reload_query_order();
+        } else {
+            show_message("退票失败", "尝试刷新页面后再次操作", false);
+        }
+      },
+      error:function(e){
+        show_message("连接失败", "服务器开了小差，请稍后再试", false);
+      }
+    })
+  }
+
+  function start_reload() {
+
+  }
+  function end_reload() {
+    reload_order();
+  }
+  reload_query_order();
+  function reload_query_order() {
+    start_reload();
+    var data = {
+      data:JSON.stringify({
+        '-u':map.get('C_USERNAME'),
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_query_order') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          number = parseInt(data["number"]);
+          orders = data["orders"];
+          show_message("查询成功", "共搜索到 " + number + " 条符合条件的订单！", true);
+          end_reload();
+        } else {
+            show_message("出现了问题", "服务器找不到任何信息", false);
+            orders = []
+            end_reload();
+        }
+      },
+      error:function(e){
+        show_message("连接失败", "服务器开了小差，请稍后再试", false);
+        orders = []
+        end_reload();
+      }
+    })
+  }    
+  
+</script>
+{% endblock %}

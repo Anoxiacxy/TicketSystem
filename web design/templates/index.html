@@ -6,7 +6,243 @@
 
 {% endblock %} 
 {% block content %}
- <div class="ui text container">
-    <div class='ui button' onclick="$('#modal').modal('show');">不要点我</div>
+<div class="ui text container">
+  <div class="ui grid">
+    <div class="row">
+      <div class="six wide column">
+        <div class="ui segment">          
+          <img id='large_avatar' class="ui fluid rounded image">
+        </div>
+        <div class="ui negative message" id="negative_message">
+          <i class="close icon" onclick="this.parentNode.style.display='none'"></i>
+          <div class="header" id="negative_message_header"></div>
+          <p id="negative_message_content"></p>
+        </div>
+        <div class="ui positive message" id="positive_message">
+          <i class="close icon" onclick="this.parentNode.style.display='none'"></i>
+          <div class="header" id="positive_message_header"></div>
+          <p id="positive_message_content"></p>
+        </div>
+      </div>
+      <div class="ten wide column">
+        <div class="ui segment">
+          <div id="search_segment">
+            <div class="ui horizontal divider"><i class="search icon"></i> 快捷搜索</div>
+            <div class="ui search" id="from_city">
+              <div class="ui icon fluid left labeled input">
+                <a class="ui label"> 出发地 </a>
+                <input class="prompt" type="text" placeholder="搜索城市" name="from_city">
+                <i class="map marker icon"></i>
+              </div>
+              <div class="results"></div>
+            </div>
+            <div class="ui horizontal divider"> 
+              <a href="javascript:;" onclick="search_swap_cities_between_from_and_to()"><i class="arrows alternate vertical icon"></i>查看返程</a> 
+              
+            </div>
+            <div class="ui search" id="to_city">
+              <div class="ui icon fluid left labeled input">
+                <a class="ui label">到达地</a>
+                <input class="prompt" type="text" placeholder="搜索城市" name="to_city">
+                <i class="map marker icon"></i>
+              </div>
+              <div class="results"></div>
+            </div>
+            
+            <div class="ui hidden divider"></div>
+      
+            <div class="ui left labeled input">
+              <a class="ui label">出发日期</a>
+              <input type="date" class="prompt" name="ticket_date">
+            </div>
+          <div class="ui primary right floated animated button" tabindex="0" onclick="
+            if (search_form_check()) {
+              window.localStorage.setItem('from_city', from_city);
+              window.localStorage.setItem('to_city', to_city);
+              window.localStorage.setItem('ticket_date', ticket_date);
+            }
+            window.location.href='/buy_ticket';
+            ">
+            <div class="visible content">查询</div>
+            <div class="hidden content">
+              <i class="right arrow icon"></i>
+            </div>
+            </div>
+          </div>
+          <div>
+            <div class="ui horizontal divider"><i class="train icon"></i> 最近订单</div>
+            <div class="ui one cards" id="train_list">
+              
+            </div>
+            <div class="ui one column grid">
+              <div class="column">
+                <div class="ui primary right floated animated button" tabindex="0" onclick="window.location.href='/orders';">
+                  <div class="visible content">更多</div>
+                  <div class="hidden content">
+                    <i class="right arrow icon"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    
+    
+    </div>
+    
   </div>
+</div>
+<script src="{{ url_for('static', filename='city_name.js') }}"></script>
+<script>
+  hide_message();
+  function hide_message() {
+    document.getElementById('negative_message').style.display="none";
+    document.getElementById('positive_message').style.display="none";
+  }
+  function show_message(header, content, is_positive) {
+    if (is_positive) {
+      document.getElementById('positive_message_header').innerText=header;
+      document.getElementById('positive_message_content').innerText=content;
+      document.getElementById('positive_message').style.display="block";
+      document.getElementById('negative_message').style.display="none";
+    } else {
+      document.getElementById('negative_message_header').innerText=header;
+      document.getElementById('negative_message_content').innerText=content;
+      document.getElementById('negative_message').style.display="block";
+      document.getElementById('positive_message').style.display="none";
+    }
+  }
+  
+  $('#large_avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5('{{ argv.C_MAILADDR }}') + '?s=128&d=identicon&r=g'); 
+  
+  var cities = getCities();
+  $('#from_city').search({
+      type: 'category',
+      source: cities,
+    });
+  $('#to_city').search({
+      type: 'category',
+      source: cities,
+    }); 
+  function search_swap_cities_between_from_and_to() {
+    var from_city = $('input[name="from_city"]').val();
+    var to_city = $('input[name="to_city"]').val();
+    $('input[name="from_city"]').val(to_city);
+    $('input[name="to_city"]').val(from_city);
+  }
+  function isnull(val) {
+    var str = val.replace(/(^\s*)|(\s*$)/g, '');
+    if (str == '' || str == undefined || str == null)
+      return true;
+    else 
+      return false;
+  }
+  function search_form_check() {
+    from_city = $('input[name="from_city"]').val();
+    to_city = $('input[name="to_city"]').val();
+    ticket_date = $('input[name="ticket_date"]').val();
+    if (isnull(from_city)) {
+      show_message("查询失败", "您未输入出发地", false);
+      $('input[name="from_city"]').focus();
+      return false;
+    } else if (isnull(to_city)) {
+      show_message("查询失败", "您未输入目的地", false);
+      $('input[name="to_city"]').focus();
+      return false;
+    } else if (isnull(ticket_date)) {
+      show_message("查询失败", "您未选择出发时间", false);
+      $('input[name="ticket_date"]').focus();
+      return false;
+    }
+    return true;
+  }
+
+  indexs = []
+  orders = []
+  function get_index() {
+    indexs = []
+    for (var i in orders) {
+      if (i < 2)
+        indexs.push(i)
+      else  
+        break;
+    }
+  }
+
+  function CN_STATUS(STATUS) {
+    if (STATUS == 'success') 
+      return '购买成功';
+    else if (STATUS == 'pending')
+      return '候补购票';
+    else  
+      return '已经退票';
+  }
+
+  function COLOR_STATUS(STATUS) {
+    if (STATUS == 'success') 
+      return 'green';
+    else if (STATUS == 'pending')
+      return 'yellow';
+    else  
+      return 'red';
+  }
+
+  function reload_order() {
+    get_index();
+    show_message("查询成功", "共搜索到 " + indexs.length + " 条符合条件的订单！", true);
+    var train_list = document.getElementById('train_list');
+    if (indexs.length == 0) {
+      item_html = "<div class='card'><div class='center aligned content'>我们找不到任何订单<br>请尝试<a href='/buy_ticket''>购买</a>一些车票</div></div>"
+      train_list.innerHTML = item_html;
+      return;
+    }
+    train_list.innerHTML = "";
+    for (var i in indexs) {
+      var item = orders[indexs[i]];
+      var item_html = '<div class="card"><div class="content"><div class="ui header">'+ item['trainID'] +'</div><div class="ui divider"></div><div class="ui center aligned grid"><div class="eight wide column"><div class="ui tiny statistic"><div class="value" id="finish_0_LEAVING_TIME">'+ item['LEAVING_TIME'] +'</div><div class="label"><div class="meta">'+ item['FROM'] +'</div>出发</div></div></div><div class="eight wide column"><div class="ui tiny statistic"><div class="value" id="finish_0_ARRIVING_TIME">'+ item['ARRIVING_TIME'] +'</div><div class="label">抵达<div class="meta" id="finish_0_TO">'+ item['TO'] +'</div></div></div></div></div></div><div class="extra content"><div class="ui two column center aligned grid"><div class="column"><button class="ui mini '+ COLOR_STATUS(item['STATUS']) +' button" id="finish_0_STATUS">'+ CN_STATUS(item['STATUS']) +'</button></div><div class="column">购买 ：<span id="finish_0_COUNT">'+ item['NUM'] +'</span>张</div></div></div></div>'
+      train_list.innerHTML += item_html;
+    }
+  }
+
+  function start_reload() {
+
+}
+function end_reload() {
+  reload_order();
+}
+
+reload_query_order();
+function reload_query_order() {
+  start_reload();
+  var data = {
+    data:JSON.stringify({
+      '-u':map.get('C_USERNAME'),
+    })
+  }
+  $.ajax({
+    url:"{{ url_for('ajax_query_order') }}",
+    type:"post",
+    data:data,
+    dataType: 'json',
+    success:function(data){
+      if (data["result"] == "success") {
+        number = parseInt(data["number"]);
+        orders = data["orders"];
+        show_message("查询成功", "共搜索到 " + number + " 条符合条件的订单！", true);
+        end_reload();
+      } else {
+          show_message("出现了问题", "服务器找不到任何信息", false);
+          orders = []
+          end_reload();
+      }
+    },
+    error:function(e){
+      show_message("连接失败", "服务器开了小差，请稍后再试", false);
+      orders = []
+      end_reload();
+    }
+  })
+}    
+</script> 
 {% endblock %}

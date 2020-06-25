@@ -6,38 +6,931 @@
 
 {% endblock %} 
 {% block content %}
- <div class="ui text container">
-   <div class="ui grid">
-     <div class="six wide column">
-      <div class="ui vertical steps">
-        <div class="completed step">
-          <i class="truck icon"></i>
+<div class="ui text container">
+  <div class="ui grid">
+    <div class="six wide column">
+      <div class="ui fluid vertical steps">
+        <div class="step" id="search_step">
+          <i class="search icon"></i>
           <div class="content">
-            <div class="title">运输</div>
-            <div class="description">选择您的运输选项</div>
+            <div class="title">查询</div>
+            <div class="description">您想要去哪里</div>
           </div>
         </div>
-        <div class="completed step">
+        <div class="step" id="select_step">
+          <i class="ticket alternate icon"></i>
+          <div class="content">
+            <div class="title">选票</div>
+            <div class="description">选择您的车票</div>
+          </div>
+        </div>
+        <div class="step" id="pay_step">
           <i class="credit card icon"></i>
           <div class="content">
             <div class="title">计费</div>
-            <div class="description">输入账单信息</div>
+            <div class="description">支付所需的费用</div>
           </div>
         </div>
-        <div class="active step">
+        <div class="step" id="finish_step">
           <i class="info icon"></i>
           <div class="content">
-            <div class="title">确认订单</div>
+            <div class="title">购买成功</div>
             <div class="description">核对订单详情</div>
           </div>
         </div>
       </div>
-     </div>
-     <div class="column">
-      <div id="">
-
+      <div class="ui negative message" id="negative_message">
+        <i class="close icon" onclick="this.parentNode.style.display='none'"></i>
+        <div class="header" id="negative_message_header"></div>
+        <p id="negative_message_content"></p>
       </div>
-     </div>
-   </div>
+      <div class="ui positive message" id="positive_message">
+        <i class="close icon" onclick="this.parentNode.style.display='none'"></i>
+        <div class="header" id="positive_message_header"></div>
+        <p id="positive_message_content"></p>
+      </div>
+    </div>
+    <div class="ten wide column">
+      <div class="ui segment">
+        <div id="search_segment">
+          <div class="ui search" id="from_city">
+            <div class="ui icon fluid left labeled input">
+              <a class="ui label"> 出发地 </a>
+              <input class="prompt" type="text" placeholder="搜索城市" name="from_city">
+              <i class="map marker icon"></i>
+            </div>
+            <div class="results"></div>
+          </div>
+          <div class="ui horizontal divider"> 
+            <a href="javascript:;" onclick="search_swap_cities_between_from_and_to()"><i class="arrows alternate vertical icon"></i>查看返程</a> 
+            
+          </div>
+          <div class="ui search" id="to_city">
+            <div class="ui icon fluid left labeled input">
+              <a class="ui label">到达地</a>
+              <input class="prompt" type="text" placeholder="搜索城市" name="to_city">
+              <i class="map marker icon"></i>
+            </div>
+            <div class="results"></div>
+          </div>
+          
+          <div class="ui hidden divider"></div>
+
+          <div class="ui left labeled input">
+            <a class="ui label">出发日期</a>
+            <input type="date" class="prompt" name="ticket_date">
+          </div>
+        <div class="ui primary right floated animated button" tabindex="0" onclick="if (search_form_check()) {next_step('search', 'select'); init_select();}">
+          <div class="visible content">查询</div>
+          <div class="hidden content">
+            <i class="right arrow icon"></i>
+          </div>
+        </div>
+        </div>
+        <div id="select_segment">
+          
+          <div class="ui secondary pointing menu">
+            <a class="item" onclick="
+              if (!transfer_mode)
+                prev_step('select', 'search')
+              else {
+                init_select();
+              }
+              "><i class="chevron left icon"></i></a>
+            <a class="item active" id="select_order_by_time" onclick="
+              if (!this.classList.contains('active')) {
+                this.classList.add('active');
+                document.getElementById('select_order_by_cost').classList.remove('active');
+                reload_query('time');
+              }
+              ">最快到达</a>
+            <a class="item" id="select_order_by_cost" onclick="
+              if (!this.classList.contains('active')) {
+                this.classList.add('active');
+                document.getElementById('select_order_by_time').classList.remove('active');
+                reload_query('cost');
+              }
+              ">最少花费 </a>
+            <div class="right menu">
+              <a class="item" id="select_reload" onclick="
+                if(document.getElementById('select_order_by_time').classList.contains('active'))
+                  reload_query('time');
+                else
+                  reload_query('cost');
+              "><i class="sync icon"></i></a>
+            </div>
+          </div>
+          <div class="ui inverted dimmer" id="segment_loader">
+            <div class="ui text loader">加载中</div>
+          </div>
+          <div class="ui one cards">
+            <div class="card" id="train_0">
+              <div class="content">
+                <div class="header" id="train_0_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="train_0_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><div class="meta" id="train_0_FROM">----</div>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="train_0_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<div class="meta" id="train_0_TO">----</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui three column grid">
+                  <div class="column"><i class="yen sign icon"></i><span id="train_0_PRICE">0</span> /人次</div>
+                  <div class="column">剩余 ：<span id="train_0_SEAT">0</span></div>
+                  <div class="column">
+                    <button class="ui primary compact right floated mini button" onclick="
+                      next_step('select', 'pay');
+                      clear_selected_index();
+                      select_index(0);
+                      init_pay();
+                    ">点击购买</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="train_1">
+              <div class="content">
+                <div class="header" id="train_1_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="train_1_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><div class="meta" id="train_1_FROM">----</div>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="train_1_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<div class="meta" id="train_1_TO">----</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui three column grid">
+                  <div class="column"><i class="yen sign icon"></i><span id="train_1_PRICE">09</span> /人次</div>
+                  <div class="column">剩余 ：<span id="train_1_SEAT">0</span></div>
+                  <div class="column">
+                    <button class="ui primary compact right floated mini button" onclick="
+                      next_step('select', 'pay');
+                      clear_selected_index();
+                      select_index(1);
+                      init_pay();
+                    ">点击购买</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="train_2">
+              <div class="content">
+                <div class="header" id="train_2_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="train_2_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><div class="meta" id="train_2_FROM">----</div>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="train_2_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<div class="meta" id="train_2_TO">----</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui three column grid">
+                  <div class="column"><i class="yen sign icon"></i><span id="train_2_PRICE">0</span> /人次</div>
+                  <div class="column">剩余 ：<span id="train_2_SEAT">0</span></div>
+                  <div class="column">
+                    <button class="ui primary compact right floated mini button" onclick="
+                      next_step('select', 'pay');
+                      clear_selected_index();
+                      select_index(2);
+                      init_pay();
+                    ">点击购买</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="hint_query_trains">
+              <div class="center aligned content">
+                没有找到合适的车次？试试
+                <a href="javascript:;" onclick="
+                  transfer_mode=true;
+                  if(document.getElementById('select_order_by_time').classList.contains('active'))
+                    reload_query('time');
+                  else
+                    reload_query('cost');
+                  ">转乘</a>
+              </div>
+            </div>
+            <div class="card" id="transfer">
+              <div class="content">
+                <div class="header" id="transfer_0_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="transfer_0_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><span class="meta" id="transfer_0_FROM">----</span>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="transfer_0_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<span class="meta" id="transfer_0_TO">----</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui three column grid">
+                  <div class="column"><i class="yen sign icon"></i><span id="transfer_0_PRICE">0</span> /人次</div>
+                  <div class="column">剩余 ：<span id="transfer_0_SEAT">0</span></div>
+                  <div class="column"></div>
+                </div>
+              </div>
+              
+              <div class="content">
+                <div class="header" id="transfer_1_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="transfer_1_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><span class="meta" id="transfer_1_FROM">----</span>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="transfer_1_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<span class="meta" id="transfer_1_TO">----</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui three column grid">
+                  <div class="column"><i class="yen sign icon"></i><span id="transfer_1_PRICE">0</span> /人次</div>
+                  <div class="column">剩余 ：<span id="transfer_1_SEAT">0</span></div>
+                  <div class="column">
+                    <button class="ui primary compact right floated mini button" onclick="
+                      next_step('select', 'pay');
+                      clear_selected_index();
+                      selected_index = [0, 1];
+                      init_pay();
+                    ">合并购买</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="hint_query_transfer">
+              <div class="center aligned content">
+                注意：转乘车票是两张打包售卖的直达车票
+                <br>
+                没有找到合适的车次？点击
+                <a href="javascript:;" onclick="
+                  transfer_mode=false;
+                  if(document.getElementById('select_order_by_time').classList.contains('active'))
+                    reload_query('time');
+                  else
+                    reload_query('cost');
+                  ">返回</a>
+              </div>
+            </div>
+          </div>
+          <div class="ui three column grid">
+            <div class="three wide column">
+              <button class="ui left floated icon button" onclick="prev_train_page()" id="select_prev_train_page">
+                <i class="left arrow icon"></i>
+              </button>
+            </div>
+            <div class="ten wide column">
+              
+            </div>
+            <div class="three wide column">
+              <button class="ui right floated icon button" onclick="next_train_page()" id="select_next_train_page">
+                <i class="right arrow icon"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div id="pay_segment">
+          <div class="ui secondary pointing menu">
+            <a class="item" onclick="
+              prev_step('pay', 'select');
+              "><i class="chevron left icon"></i></a>
+            <a class="item active">支付订单</a>
+            <div class="right menu">
+              
+            </div>
+          </div>
+          <div class="ui one cards">
+            <div class="card" id="pay_0">
+              <div class="content">
+                <div class="ui header" id="pay_0_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="pay_0_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><div class="meta" id="pay_0_FROM">----</div>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="pay_0_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<div class="meta" id="pay_0_TO">----</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui three column grid">
+                  <div class="column"><i class="yen sign icon"></i><span id="pay_0_PRICE">0</span> /人次</div>
+                  <div class="column">剩余 ：<span id="pay_0_SEAT">0</span></div>
+                  <div class="column">
+                    <div class="ui right labeled fluid mini input">
+                      <input type="text" placeholder="1" id="pay_0_COUNT" onchange="
+                        var value = '1';
+                        if (!isnull(this.value))
+                          value = this.value;
+                        if (count_form_check(value)) {
+                          update_ticket_count(0, value);
+                        } else { this.value = ''; 
+                          update_ticket_count(0, '1');
+                        }
+                      ">
+                      <span class="ui basic label">张</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ui bottom attached warning message">
+                <i class="icon help"></i> 票数不足时，是否接受候补购票？ 
+                <span class="ui right floated checkbox">
+                  <input type="checkbox" id="pay_0_queue">
+                  <label>我接受</label>
+                </span>
+              </div>
+            </div>
+            <div class="card" id="pay_1">
+              <div class="content">
+                <div class="header" id="pay_1_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="pay_1_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><div class="meta" id="pay_1_FROM">----</div>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="pay_1_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<div class="meta" id="pay_1_TO">----</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui three column grid">
+                  <div class="column"><i class="yen sign icon"></i><span id="pay_1_PRICE">0</span> /人次</div>
+                  <div class="column">剩余 ：<span id="pay_1_SEAT">0</span></div>
+                  <div class="column">
+                    <div class="ui right labeled fluid mini input">
+                      <input type="text" placeholder="1" id="pay_1_COUNT" onchange="
+                        var value = '1';
+                        if (!isnull(this.value))
+                          value = this.value;
+                        if (count_form_check(value)) {
+                          update_ticket_count(1, value);
+                        } else { this.value = ''; 
+                          update_ticket_count(1, '1');
+                        }
+                      ">
+                      <span class="ui basic label">张</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="ui bottom attached warning message">
+                <i class="icon help"></i> 票数不足时，是否接受候补购票？ 
+                <span class="ui right floated checkbox">
+                  <input type="checkbox" id="pay_1_queue">
+                  <label>我接受</label>
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="ui divider"></div>
+          <div class="ui grid">
+            <div class="ten wide column">
+              <div class="ui small statistic">
+                <div class="value"><i class="yen sign icon"></i><span id="total_PRICE"></span></div>
+                <div class="label"></div>
+              </div>
+            </div>
+            <div class="six wide column">
+              <button class="ui primary right floated button" onclick="next_step('pay', 'finish'); init_finish();">支付</button>
+            </div>
+          </div>
+          
+        </div>
+        <div id="finish_segment">
+          <div class="ui message">
+            <i class="close icon" onclick="this.parentNode.style.display='none'"></i>
+            <div class="header" id="negative_message_header">提交成功</div>
+            <p id="negative_message_content">请核对您的订单状态</p>
+          </div>
+          <div class="ui one cards">
+            <div class="card" id="finish_0">
+              <div class="content">
+                <div class="ui header" id="finish_0_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="finish_0_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><div class="meta" id="finish_0_FROM">----</div>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="finish_0_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<div class="meta" id="finish_0_TO">----</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui two column center aligned grid">
+                  <div class="column">
+                    <button class="ui mini fluid button" id="finish_0_state"></button>
+                  </div>
+                  <div class="column">购买 ：<span id="finish_0_COUNT">0</span>张</div>
+                </div>
+              </div>
+            </div>
+            <div class="card" id="finish_1">
+              <div class="content">
+                <div class="ui header" id="finish_1_trainID">--</div>
+                <div class="ui divider"></div>
+                <div class="ui center aligned grid">
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="finish_1_LEAVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label"><div class="meta" id="finish_1_FROM">----</div>出发</div>
+                    </div>
+                  </div>
+                  <div class="eight wide column">
+                    <div class="ui tiny statistic">
+                      <div class="value" id="finish_1_ARRIVING_TIME">
+                        **-** **:**
+                      </div>
+                      <div class="label">抵达<div class="meta" id="finish_1_TO">----</div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="extra content">
+                <div class="ui two column center aligned grid">
+                  <div class="column">
+                    <button class="ui mini fluid button" id="finish_1_state"></button>
+                  </div>
+                  <div class="column">购买 ：<span id="finish_1_COUNT">0</span>张</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button class="ui primary right floated button" onclick="javascript:window.location.href='/';">完成</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+<script src="{{ url_for('static', filename='city_name.js') }}"></script>
+<script>
+  train_list_length = 3;
+  now_begin_index = 0;
+  
+  init_step();
+  var cities = getCities();
+  $('#from_city').search({
+      type: 'category',
+      source: cities,
+    });
+  $('#to_city').search({
+      type: 'category',
+      source: cities,
+    }); 
+  
+  function my_debug() {
+    $('input[name="from_city"]').val(window.localStorage.getItem('from_city'));
+    $('input[name="to_city"]').val(window.localStorage.getItem('to_city'));
+    $('input[name="ticket_date"]').val(window.localStorage.getItem('ticket_date'));
+    window.localStorage.removeItem('from_city');
+    window.localStorage.removeItem('to_city');
+    window.localStorage.removeItem('ticket_date');
+  }
+
+  function init_step() {
+    document.getElementById("select_segment").style.display="none";
+    document.getElementById("pay_segment").style.display="none";
+    document.getElementById("finish_segment").style.display="none";
+    document.getElementById("search_step").classList.add('active');
+    document.getElementById("search_segment").style.display = "block";
+    my_debug();
+  }
+  function next_step(now, next) {
+    hide_message();
+    document.getElementById(now + "_step").classList.remove('active');
+    document.getElementById(now + "_step").classList.add('completed');
+    document.getElementById(now + "_segment").style.display = "none";
+    document.getElementById(next + "_step").classList.add('active');
+    document.getElementById(next + "_segment").style.display = "block";
+  }
+  function prev_step(now, prev) {
+    hide_message();
+    document.getElementById(now + "_step").classList.remove('active');
+    document.getElementById(now + "_segment").style.display = "none";
+    document.getElementById(prev + "_step").classList.remove('completed');
+    document.getElementById(prev + "_step").classList.add('active');
+    document.getElementById(prev + "_segment").style.display = "block";
+  }
+  function search_swap_cities_between_from_and_to() {
+    var from_city = $('input[name="from_city"]').val();
+    var to_city = $('input[name="to_city"]').val();
+    $('input[name="from_city"]').val(to_city);
+    $('input[name="to_city"]').val(from_city);
+  }
+  
+  hide_message();
+
+  function hide_message() {
+    document.getElementById('negative_message').style.display="none";
+    document.getElementById('positive_message').style.display="none";
+  }
+  function show_message(header, content, is_positive) {
+    if (is_positive) {
+      document.getElementById('positive_message_header').innerText=header;
+      document.getElementById('positive_message_content').innerText=content;
+      document.getElementById('positive_message').style.display="block";
+      document.getElementById('negative_message').style.display="none";
+    } else {
+      document.getElementById('negative_message_header').innerText=header;
+      document.getElementById('negative_message_content').innerText=content;
+      document.getElementById('negative_message').style.display="block";
+      document.getElementById('positive_message').style.display="none";
+    }
+  }
+
+  function isnull(val) {
+    var str = val.replace(/(^\s*)|(\s*$)/g, '');
+    if (str == '' || str == undefined || str == null)
+      return true;
+    else 
+      return false;
+  }
+  function search_form_check() {
+    from_city = $('input[name="from_city"]').val();
+    to_city = $('input[name="to_city"]').val();
+    ticket_date = $('input[name="ticket_date"]').val();
+    if (isnull(from_city)) {
+      show_message("查询失败", "您未输入出发地", false);
+      $('input[name="from_city"]').focus();
+      return false;
+    } else if (isnull(to_city)) {
+      show_message("查询失败", "您未输入目的地", false);
+      $('input[name="to_city"]').focus();
+      return false;
+    } else if (isnull(ticket_date)) {
+      show_message("查询失败", "您未选择出发时间", false);
+      $('input[name="ticket_date"]').focus();
+      return false;
+    }
+    return true;
+  }
+
+  function hide_trains() {
+    for (var i = 0; i < train_list_length; i++) {
+      var pre = "train_" + i;
+      document.getElementById(pre).style.display="none";
+    }
+    document.getElementById('hint_query_trains').style.display="none";
+    document.getElementById("select_next_train_page").style.display="none";
+    document.getElementById("select_prev_train_page").style.display="none";
+  }
+  function show_trains(begin_index) {
+    hide_transfer();
+    now_begin_index = begin_index;
+    for (var i = 0; i < train_list_length; i++) {
+      var pre = "train_" + i;
+      if (i + begin_index < trains.length) {
+        document.getElementById(pre).style.display="";
+        for (var e in trains[i]) 
+          document.getElementById(pre + '_' + e).innerText=trains[i][e];
+      } else {
+        document.getElementById(pre).style.display="none";
+      }
+    }
+    document.getElementById("select_next_train_page").style.display="";
+    if (now_begin_index + train_list_length >= trains.length) {
+      document.getElementById("select_next_train_page").classList.add('disabled');
+    } else {
+      document.getElementById("select_next_train_page").classList.remove('disabled');
+    }
+
+    document.getElementById("select_prev_train_page").style.display="";
+    if (now_begin_index - train_list_length < 0) {
+      document.getElementById("select_prev_train_page").classList.add('disabled');
+    } else {
+      document.getElementById("select_prev_train_page").classList.remove('disabled');
+    }
+
+    if (begin_index + train_list_length >= trains.length) {
+      document.getElementById('hint_query_trains').style.display="";
+    } else {
+      document.getElementById('hint_query_trains').style.display="none";
+    }
+
+  }
+
+  function next_train_page() {
+    show_trains(now_begin_index + train_list_length);
+  }
+  function prev_train_page() {
+    show_trains(now_begin_index - train_list_length);
+  }
+
+  function init_select() {
+    selected_index = []
+    transfer_mode = false;
+    document.getElementById('select_order_by_cost').classList.remove('active');
+    document.getElementById('select_order_by_time').classList.add('active');
+    reload_query("time")
+  }
+
+  function reload_query(order_by) {
+    if (!transfer_mode) 
+      reload_query_ticket(order_by);
+    else
+      reload_query_transfer(order_by);
+  }
+
+  function reload_query_ticket(order_by) {
+    document.getElementById('segment_loader').classList.add('active');
+    var data = {
+      data:JSON.stringify({
+        '-s':from_city,
+        '-t':to_city,
+        "-d":ticket_date.substring(5),
+        "-p":order_by,
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_query_ticket') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success" && parseInt(data["number"]) != 0) {
+          number = parseInt(data["number"]);
+          trains = data["trains"];
+          show_message("查询成功", "共搜索到 " + number + " 条符合条件的车次！", true);
+          show_trains(0);
+          document.getElementById('segment_loader').classList.remove('active');
+        } else {
+          show_message("出现了问题", "服务器找不到任何信息", false);
+          trains = []
+          show_trains(0);
+          document.getElementById('segment_loader').classList.remove('active');
+        }
+      },
+      error:function(e){
+        show_message("连接失败", "服务器开了小差，请稍后再试", false);
+        trains = []
+        show_trains(0);
+        document.getElementById('segment_loader').classList.remove('active');
+      }
+    })
+  }
+  function reload_query_transfer(order_by) {
+    document.getElementById('segment_loader').classList.add('active');
+    var data = {
+      data:JSON.stringify({
+        '-s':from_city,
+        '-t':to_city,
+        "-d":ticket_date.substring(5),
+        "-p":order_by,
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_query_transfer') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          trains = data["trains"];
+          show_message("查询成功", "为您找到了一条最佳的转乘路线！", true);
+          show_transfer();
+          document.getElementById('segment_loader').classList.remove('active');
+        } else {
+          trains = []
+          show_message("出现了问题", "服务器找不到任何信息", false);
+          show_transfer();
+          document.getElementById('segment_loader').classList.remove('active');
+        }
+      },
+      error:function(e){
+        trains = []
+        show_message("连接失败", "服务器开了小差，请稍后再试", false);
+        show_transfer();
+        document.getElementById('segment_loader').classList.remove('active');
+      }
+    })
+  }
+  
+  function hide_transfer() {
+    document.getElementById('transfer').style.display="none";
+    document.getElementById('hint_query_transfer').style.display="none";
+  }
+  function show_transfer() {
+    hide_trains();
+    document.getElementById('hint_query_transfer').style.display="block";
+    if (trains.length == 2) {
+      document.getElementById('transfer').style.display="block";
+        for (var i = 0; i < 2; i++) {
+          var pre = "transfer_" + i;
+          for (var e in trains[i]) 
+            document.getElementById(pre + '_' + e).innerText=trains[i][e];
+        }
+    } else {
+      document.getElementById('transfer').style.display="none";
+    }
+    
+  }
+
+ 
+  function clear_selected_index() {
+    selected_index = []
+  }
+  function select_index(index) {
+    selected_index.push(index + now_begin_index);
+  }
+
+  function init_pay() {
+    counts = [1, 1]
+    show_pay();
+    for (var i = 0; i < selected_index.length; i++)
+      update_ticket_count(i, 1);
+  }
+
+  function show_pay() {
+    for (var i = 0; i < 2; i++) {
+      var pre = "pay_" + i;
+      if (i >= selected_index.length) {
+        document.getElementById(pre).style.display="none";
+      } else {
+        document.getElementById(pre).style.display="block";
+        var train = trains[selected_index[i]];
+        for (var e in train) 
+          document.getElementById(pre + '_' + e).innerText = train[e];
+      }
+    }
+  }
+  function count_form_check(data){
+    patten = /^\d+$/;
+    if (!patten.test(data)) {    
+      show_message("车票数量格式错误", "请输入一个正整数！",false);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function update_ticket_count(id, count) {
+    counts[id] = parseInt(count);
+    var sum = 0;
+    for (var i = 0; i < selected_index.length; i++) {
+      var pre = "pay_" + i;
+      sum += parseInt(document.getElementById(pre + '_' + 'PRICE').innerText) * counts[i];
+    }
+    document.getElementById('total_PRICE').innerText=sum;
+  }
+
+  function buy_ticket(index, count, queue) {
+    var data = {
+      data:JSON.stringify({
+        '-u':map.get('C_USERNAME'),
+        '-i':trains[selected_index[index]]['trainID'],
+        '-d':trains[selected_index[index]]['LEAVING_TIME'].substr(0, 5),
+        '-n':count + '',
+        '-f':trains[selected_index[index]]['FROM'],
+        '-t':trains[selected_index[index]]['TO'],
+        '-q':queue ? 'true' : 'false',
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_buy_ticket') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == 'success') {
+          show_message("购买成功", "请留意发车时间，不要错过", true);
+          document.getElementById('finish_' + index + '_state').innerText = "购买成功";
+          document.getElementById('finish_' + index + '_state').classList.add('green');
+        } else if (data['result'] == 'queue') {
+          show_message("票数不足", "一笔订单已加入候补购票", false);
+          document.getElementById('finish_' + index + '_state').innerText = "加入候补";
+          document.getElementById('finish_' + index + '_state').classList.add('yellow');
+        } else {
+          show_message("购买失败", "请尝试刷新页面后重新购买", false);
+          document.getElementById('finish_' + index + '_state').innerText = "购买失败";
+          document.getElementById('finish_' + index + '_state').classList.add('red');
+        }
+      },
+      error:function(e){
+        show_message("连接失败", "服务器开了小差，请稍后再试", false);
+        document.getElementById('finish_' + index + '_state').innerText = "购买失败";
+        document.getElementById('finish_' + index + '_state').classList.add('red');
+      }
+    })
+  }
+
+  function init_finish() {
+    for (var i = 0; i < selected_index.length; i++) 
+      buy_ticket(i, counts[i], document.getElementById('pay_' + i + '_queue').checked);
+    show_finish();
+  }
+
+  function show_finish() {
+    for (var i = 0; i < 2; i++) {
+      var pre = "finish_" + i;
+      if (i >= selected_index.length) {
+        document.getElementById(pre).style.display="none";
+      } else {
+        document.getElementById(pre).style.display="block";
+        var train = trains[selected_index[i]];
+        for (var e in train) {
+          if (e == "SEAT") continue;
+          if (e == "PRICE") continue;
+          document.getElementById(pre + '_' + e).innerText = train[e];
+        }
+        document.getElementById(pre + '_' + 'COUNT').innerText = counts[i];
+      }
+    }
+  }
+
+</script>
 {% endblock %}

@@ -9,8 +9,9 @@
 #include "../../backend/interpreter.hpp"
 
 using namespace sjtu;
+bool cleaned = false;
 
-#define MAXBUFF 4096
+#define MAXBUFF 16384
 
 template<class Interpret>
 class Server {
@@ -34,7 +35,7 @@ public:
     ~Server() {
         close(server_sockfd);
     }
-    void run_once() {
+    void run_once(bool with_backend) {
         int client_sockfd;
         struct sockaddr_in client_sockaddr;
         socklen_t client_socklen = sizeof(client_sockaddr);
@@ -50,17 +51,27 @@ public:
             int n = recv(client_sockfd, buff, MAXBUFF, 0);
             buff[n] = '\0';
             printf("recv msg from client <<< %s\n", buff);
-            inpterpreter(buff);
-            printf("send msg to client >>> %s\n", buff);
-            send(client_sockfd, buff, strlen(buff), 0);
+            fflush(stdout);
+            if (with_backend) {
+                printf("pending\n");
+                inpterpreter(buff);
+                printf("send msg to client >>> %s\n", buff);
+            } else {
+                printf("send msg to client >>> ");
+                scanf("%s", buff);
+            }
+            n = strlen(buff);
+            fflush(stdout);
+            buff[n] = '\0';
+            send(client_sockfd, buff, n, 0);
             close_flag = true;    
         }
         close(client_sockfd);
     }
-    void run() {
+    void run(bool with_backend) {
         run_flag = true;
         while (run_flag) {
-            run_once(); 
+            run_once(with_backend); 
         }
     }
 };
@@ -69,6 +80,9 @@ public:
 
 int main(int argc, char** argv){
     Server<Interpreter> server;
-    server.run();
+    if (argc == 1)
+        server.run(true);
+    else
+        server.run(false);
     return 0;
 }

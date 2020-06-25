@@ -159,11 +159,7 @@
 <script>
   //$(document).ready(function(){
     $('#large_avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5('{{ argv.C_MAILADDR }}') + '?s=128&d=identicon&r=g');
-    $('.icon')
-      .popup()
-    ;
-    document.getElementById('negative_message').style.display="none";
-    document.getElementById('positive_message').style.display="none";
+    hide_message();
     my_all_hide("edit_username");
     my_all_hide("edit_password");
     my_all_hide("edit_name");
@@ -172,8 +168,8 @@
   //});
   
   function reload_avatar() {
-      $('#large_avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5('{{ argv.C_MAILADDR }}') + '?s=512&d=identicon&r=g');
-      $('#avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5('{{ argv.C_MAILADDR }}') + '?s=26&d=identicon&r=g');
+      $('#large_avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5(map.get('C_MAILADDR')) + '?s=512&d=identicon&r=g');
+      $('#avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5(map.get('C_MAILADDR')) + '?s=26&d=identicon&r=g');
 
     }
 
@@ -184,6 +180,11 @@
   function my_all_show(what) {
     es = document.getElementsByName(what);
     for (i = 0; i < es.length; i++) es[i].style.display="inline";
+  }
+
+  function hide_message() {
+    document.getElementById('negative_message').style.display="none";
+    document.getElementById('positive_message').style.display="none";
   }
 
   function show_message(header, content, is_positive) {
@@ -231,11 +232,6 @@
   function finish_edit_password() {
     my_all_hide("edit_password");
     my_all_show("show_password");
-    var old_password = $('input[name="password"]').val();
-    if (old_password != map.get('C_PASSWORD')) {
-      show_message("修改失败", "原密码有误！", false);
-      return false;
-    }
     
     var new_password = $('input[name="new_password"]').val();
     var new_password_again = $('input[name="new_password_again"]').val();
@@ -258,8 +254,7 @@
       data:data,
       dataType: 'json',
       success:function(data){
-        if (data["type"] == "success") {
-          map.set('C_PASSWORD', $('input[name="new_password"]').val());
+        if (data["result"] == "success") {
           show_message("恭喜您", "您的密码修改成功，请牢记！", true);
         } else {
           show_message("出现了问题", "服务器拒绝了你的修改", false);
@@ -312,7 +307,7 @@
       data:data,
       dataType: 'json',
       success:function(data){
-        if (data["type"] == "success") {
+        if (data["result"] == "success") {
           map.set('C_NAME', data['C_NAME']);
           document.getElementById('show_name_text').innerText=map.get('C_NAME');
           document.getElementById('name_in_title').innerText=map.get('C_NAME');
@@ -369,10 +364,11 @@
       data:data,
       dataType: 'json',
       success:function(data){
-        if (data["type"] == "success") {
+        if (data["result"] == "success") {
           map.set('C_MAILADDR', data['C_MAILADDR']);
           document.getElementById('show_mailAddr_text').innerText=map.get('C_MAILADDR')
           show_message("恭喜您", "您的邮箱修改成功！", true);
+          reload_avatar();
         } else {
           show_message("出现了问题", "服务器拒绝了你的修改", false);
         }
@@ -390,7 +386,7 @@
     $('input[name="privilege"]').val(map.get('C_PRIVILEGE')).focus();
   }
   function privilege_form_check(data){
-    patten = /^\d+/;
+    patten = /^\d+$/;
     if (!patten.test(data)) {    
       show_message("权限等级格式错误", "请输入0~10的整数",false);
       return false;
@@ -421,7 +417,7 @@
       data:data,
       dataType: 'json',
       success:function(data){
-        if (data["type"] == "success") {
+        if (data["result"] == "success") {
           map.set('C_PRIVILEGE', data['C_PRIVILEGE']);
           document.getElementById('show_privilege_text').innerText=map.get('C_PRIVILEGE')
           show_message("恭喜您", "您的权限修改成功！", true);

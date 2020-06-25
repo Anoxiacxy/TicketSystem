@@ -1,0 +1,615 @@
+{% extends 'base.html' %}
+{% block title %}
+<title>12307 | 用户管理</title>
+{% endblock %} 
+{% block head %}
+
+{% endblock %} 
+{% block content %}
+<div class="ui text container">
+  <div class="ui segment">
+    <div class="ui fluid input">
+      <input type="text" placeholder="搜索您想查看的用户..." id="username_input">
+    </div>
+    <br>
+    <div class="ui two buttons">
+      <button class="ui primary button" onclick="reload_user()">查询</button>
+      <div class='or'></div>
+      <button class="ui primary button" onclick="show_add_user()">添加新用户</button>  
+    </div>
+  </div>
+  <div class="ui negative message" id="negative_message">
+    <i class="close icon" onclick="document.getElementById('negative_message').style.display='none'"></i>
+    <div class="header" id="negative_message_header"></div>
+    <p id="negative_message_content"></p>
+  </div>
+  <div class="ui positive message" id="positive_message">
+    <i class="close icon" onclick="document.getElementById('positive_message').style.display='none'"></i>
+    <div class="header" id="positive_message_header"></div>
+    <p id="positive_message_content"></p>
+  </div>
+  <div id="show_user">
+    <div class="ui grid">
+      <div class="row">
+        <div class="six wide column">
+          <div class="ui segment">          
+            <img id='large_avatar' class="ui fluid rounded image">
+            <br>
+            <div class="ui fluid buttons">
+              <button class="ui button" onclick="javascrtpt:window.open('https://secure.gravatar.com')">修改头像</button>
+              <button class='ui secondary icon button' onclick="reload_avatar()"><i class="sync icon"></i></button>
+            </div>
+            <br>
+            <div class="ui divider"></div>
+            <p>我们使用 gravatar 服务来获取您的头像，您的头像将和您的邮箱绑定，如果想要修改你的头像，请在 gravatar 网站上登陆您的邮箱并修改对应的头像。</p>
+          </div>
+        </div>
+        <div class="ten wide column">
+          <div class="ui segment">
+            <center>
+              <h1 class="ui header">
+                欢迎来到 
+                <span id="name_in_title">
+                  {{ argv.C_NAME }}
+                </span>  
+                的主页
+              </h1>
+            </center>
+                  
+          </div>
+          <div class="ui segment">
+            
+            <table class="ui very basic padded table">
+              <thead>
+                <tr><th colspan="3">  <h3>个人信息</h3></th>
+              </tr></thead>
+              <tbody>
+
+                <tr>
+                  <td class="collapsing"><i class="id badge icon"></i> 账户 </td>
+                  <td>
+                    <div name="show_username" id="show_username_text">{{ argv.C_USERNAME }}</div>
+                    <div class="ui input" name="edit_username">
+                      <input type="text" name="username" placeholder="请输入新的账户">
+                    </div>
+                  </td>
+                  <td class="right aligned collapsing"> 
+                    <a href="javascript:;" onclick="edit_username()" name="show_username"><i class="edit icon"></i></a> 
+                    <a href="javascript:;" onclick="finish_edit_username()" name="edit_username"><i class="check icon"></i></a> 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><i class="lock icon"></i> 密码 </td>
+                  <td>  
+                    <div name="show_password">
+                      ••••••
+                    </div>
+                    <div name="edit_password">
+                      <b>当前密码</b>
+                      <br>
+                      <div class="ui input">
+                        <input type="password" name="password" placeholder="请输入当前密码">
+                      </div>
+                      <br>
+                      忘记密码？你可以 <a href="#">重置密码</a>
+                      <br>
+                      <b>新密码</b>
+                      <br><br>
+                      <div class="ui input">
+                        <input type="password" name="new_password" placeholder="请输入新密码">
+                      </div>
+                      <br><br>
+                      <div class="ui input">
+                        <input type="password" name="new_password_again" placeholder="再次确认新密码">
+                      </div>
+                      <br><br>
+                      <button class="ui primary button" onclick="finish_edit_password()">确认</button>
+                      <button class="ui button" onclick="cancel_edit_password()">取消</button>
+                    </div>
+                    
+                  </td>
+                  <td class="right aligned collapsing" id="edit_password_icon"> 
+                    <a href="javascript:;" onclick="edit_password()" name="show_password"><i class="edit icon"></i></a> 
+                    <!-- <a href="javascript:;" onclick="finish_edit_password()" name="edit_password"><i class="check icon"></i></a> -->
+                  </td>
+                </tr>
+
+                <tr>
+                  <td class="collapsing"><i class="user icon"></i> 姓名 </td>
+                  <td>
+                    <div name="show_name" id="show_name_text">{{ argv.C_NAME }}</div>
+                    <div class="ui input" name="edit_name">
+                      <input type="text" name="name" placeholder="请输入新的名字">
+                    </div>
+                  </td>
+                  <td class="right aligned collapsing"> 
+                    <a href="javascript:;" onclick="edit_name()" name="show_name"><i class="edit icon"></i></a> 
+                    <a href="javascript:;" onclick="finish_edit_name()" name="edit_name"><i class="check icon"></i></a> 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><i class="envelope icon"></i> 邮箱 </td>
+                  <td>
+                    <div name="show_mailAddr" id="show_mailAddr_text">{{ argv.C_MAILADDR }}</div>
+                    <div class="ui input" name="edit_mailAddr">
+                      <input type="text" name="mailAddr" placeholder="请输入新的邮箱">
+                    </div>
+                  </td>
+                  <td class="right aligned collapsing"> 
+                    <a href="javascript:;" onclick="edit_mailAddr()" name="show_mailAddr"><i class="edit icon"></i></a> 
+                    <a href="javascript:;" onclick="finish_edit_mailAddr()" name="edit_mailAddr"><i class="check icon"></i></a> 
+                  </td>
+                </tr>
+
+                <tr>
+                  <td><i class="shield alternate icon"></i> 权限 </td>
+                  <td>
+                    <div name="show_privilege" id="show_privilege_text">{{ argv.C_PRIVILEGE }}</div>
+                    <div class="ui input" name="edit_privilege">
+                      <input type="text" name="privilege" placeholder="请输入更新后的权限">
+                    </div>
+                  </td>
+                  <td class="right aligned collapsing"> 
+                    <a href="javascript:;" onclick="edit_privilege()" name="show_privilege"><i class="edit icon"></i></a> 
+                    <a href="javascript:;" onclick="finish_edit_privilege()" name="edit_privilege"><i class="check icon"></i></a> 
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="add_user">
+    <div class="ui segment">
+            
+      <table class="ui very basic padded table">
+        <thead>
+          <tr><th colspan="2">  <h3>添加用户</h3></th>
+        </tr></thead>
+        <tbody>
+
+          <tr>
+            <td class="collapsing"><i class="id badge icon"></i> 账户 </td>
+            <td>
+              <div class="ui fluid input" name="add_username">
+                <input type="text" name="add_username" placeholder="请输入新的账户">
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><i class="lock icon"></i> 密码 </td>
+            <td>
+              <div class="ui fluid input" name="add_password">
+                <input type="text" name="add_password" placeholder="请输入密码">
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="collapsing"><i class="user icon"></i> 姓名 </td>
+            <td>
+              <div class="ui fluid input" name="add_name">
+                <input type="text" name="add_name" placeholder="请输入名字">
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><i class="envelope icon"></i> 邮箱 </td>
+            <td>
+              <div class="ui fluid input" name="add_mailAddr">
+                <input type="text" name="add_mailAddr" placeholder="请输入邮箱">
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td><i class="shield alternate icon"></i> 权限 </td>
+            <td>
+              <div class="ui fluid input" name="add_privilege">
+                <input type="text" name="add_privilege" placeholder="请输入权限">
+              </div>
+            </td>
+          </tr>
+
+        </tbody>
+      </table>
+      <button class="ui right floated button" onclick="if(check_add_user()) add_user();">点击添加</button>
+    </div>
+  </div>
+</div>
+<script>
+  function check_add_user() {
+    if (!username_form_check($('input[name="add_username"]').val()))
+      return false;
+    map.set('N_USERNAME', $('input[name="add_username"]').val());
+    if (!password_form_check($('input[name="add_password"]').val()))
+      return false;
+    map.set('N_PASSWORD', $('input[name="add_password"]').val());
+    if (!name_form_check($('input[name="add_name"]').val()))
+      return false;
+    map.set('N_NAME', $('input[name="add_name"]').val());
+    if (!mailAddr_form_check($('input[name="add_mailAddr"]').val()))
+      return false;
+    map.set('N_MAILADDR', $('input[name="add_mailAddr"]').val());
+    if (!privilege_form_check($('input[name="add_privilege"]').val()))
+      return false;
+    map.set('N_PRIVILEGE', $('input[name="add_privilege"]').val());
+    return true;
+  }
+  function add_user() {
+    var data = {
+      data:JSON.stringify({
+        '-c':map.get('C_USERNAME'),
+        '-u':map.get('N_USERNAME'),
+        '-p':map.get('N_PASSWORD'),
+        '-n':map.get('N_NAME'),
+        '-g':map.get('N_PRIVILEGE'),
+        '-m':map.get('N_MAILADDR'),
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_add_user') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          show_message("添加成功", "你现在可以查看该用户的信息了", true);
+          
+          reload_avatar();
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的查询", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+  }
+  function show_add_user() {
+    document.getElementById('add_user').style.display="";
+    document.getElementById('show_user').style.display="none";
+  }
+
+  init();
+  function init() {
+    map.set('N_USERNAME', map.get('C_USERNAME'));
+    map.set('N_NAME', map.get('C_NAME'));
+    map.set('N_MAILADDR', map.get('C_MAILADDR'));
+    map.set('N_PRIVILEGE', map.get('C_PRIVILEGE'));
+    document.getElementById('add_user').style.display="none";
+  }
+  function reload_user() {
+    var username = document.getElementById('username_input').value;
+    if (username == "") {
+      show_message("查询失败", "请输入你想要查询的用户名", false);
+      return;
+    }
+    
+    var data = {
+      data:JSON.stringify({
+        '-c':map.get('C_USERNAME'),
+        '-u':username,
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_query_profile') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          map.set('N_USERNAME', data['C_USERNAME']);
+          map.set('N_NAME', data['C_NAME']);
+          map.set('N_MAILADDR', data['C_MAILADDR']);
+          map.set('N_PRIVILEGE', data['C_PRIVILEGE']);
+          show_message("查询成功", "你现在可以查看该用户的信息了", true);
+          document.getElementById('show_user').style.display="";
+          document.getElementById('add_user').style.display="none";
+          document.getElementById('show_name_text').innerText=map.get('N_NAME');
+          document.getElementById('name_in_title').innerText=map.get('N_NAME');
+          document.getElementById('show_mailAddr_text').innerText=map.get('N_MAILADDR')
+          document.getElementById('show_privilege_text').innerText=map.get('N_PRIVILEGE')
+          document.getElementById('show_username_text').innerText=map.get('N_USERNAME')
+          reload_avatar();
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的查询", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+  }
+  $('#large_avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5('{{ argv.C_MAILADDR }}') + '?s=128&d=identicon&r=g');
+  hide_message();
+  my_all_hide("edit_username");
+  my_all_hide("edit_password");
+  my_all_hide("edit_name");
+  my_all_hide("edit_mailAddr");
+  my_all_hide("edit_privilege");
+  function reload_avatar() {
+    $('#large_avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5(map.get('N_MAILADDR')) + '?s=512&d=identicon&r=g');
+    $('#avatar').attr('src', 'https://secure.gravatar.com/avatar/' + $.md5(map.get('C_MAILADDR')) + '?s=26&d=identicon&r=g');
+
+  }
+  function my_all_hide(what) {
+    es = document.getElementsByName(what);
+    for (i = 0; i < es.length; i++) es[i].style.display="none";
+  }
+  function my_all_show(what) {
+    es = document.getElementsByName(what);
+    for (i = 0; i < es.length; i++) es[i].style.display="inline";
+  }
+
+  function hide_message() {
+    document.getElementById('negative_message').style.display="none";
+    document.getElementById('positive_message').style.display="none";
+  }
+
+  function show_message(header, content, is_positive) {
+    if (is_positive) {
+      document.getElementById('positive_message_header').innerText=header;
+      document.getElementById('positive_message_content').innerText=content;
+      document.getElementById('positive_message').style.display="block";
+      document.getElementById('negative_message').style.display="none";
+    } else {
+      document.getElementById('negative_message_header').innerText=header;
+      document.getElementById('negative_message_content').innerText=content;
+      document.getElementById('negative_message').style.display="block";
+      document.getElementById('positive_message').style.display="none";
+    }
+  }
+
+  function edit_username() {
+    show_message("抱歉", "用户名是您的唯一标识符，暂不支持修改！", false);
+    return;
+    my_all_hide("show_username");
+    my_all_show("edit_username");
+    $('input[name="username"]').val(map.get('N_USERNAME')).focus();
+  }
+  function finish_edit_username() {
+    my_all_hide("edit_username");
+    my_all_show("show_username");
+  }
+
+  function edit_password() {
+    my_all_hide("show_password");
+    my_all_show("edit_password");
+    $('input[name="password"]').focus();
+  }
+
+  function username_form_check(data) {
+    patten = /^[a-zA-Z0-9_-]{1,20}$/;
+    if (!patten.test(data)) {    
+      show_message("账户格式错误", "您的用户名至少需要1个字符，最长不超过20个字符，且仅包含字母数字和下划线",false);
+      return false;
+    } else {
+      return true;
+    }
+    return true;
+  }
+
+  function password_form_check(data) {
+    patten = /^[a-zA-Z0-9_-]{6,30}$/;
+    if (!patten.test(data)) {    
+      show_message("密码格式错误", "您的密码至少需要6个字符，最长不超过30个字符，且仅包含字母数字和下划线",false);
+      return false;
+    } else {
+      return true;
+    }
+    return true;
+  }
+  function finish_edit_password() {
+    my_all_hide("edit_password");
+    my_all_show("show_password");
+    
+    var new_password = $('input[name="new_password"]').val();
+    var new_password_again = $('input[name="new_password_again"]').val();
+    if (!password_form_check(new_password)) return;
+    if (new_password != new_password_again) {
+      show_message("修改失败","两次输入的新密码不匹配！", false);
+      return;
+    }
+
+    var data = {
+      data:JSON.stringify({
+        '-c':map.get('C_USERNAME'),
+        '-u':map.get('N_USERNAME'),
+        "-p":new_password
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_modify_profile') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          map.set('N_PASSWORD', $('input[name="new_password"]').val());
+          show_message("恭喜您", "您的密码修改成功，请牢记！", true);
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的修改", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+  }
+
+  function cancel_edit_password() {
+    my_all_hide("edit_password");
+    my_all_show("show_password");
+  }
+
+  function edit_name() {
+    my_all_hide("show_name");
+    my_all_show("edit_name");
+    $('input[name="name"]').val(map.get('N_NAME')).focus();
+  }
+
+  function name_form_check(data) {
+    patten = /^[\u4e00-\u9fa5]{2,5}$/;
+    if (!patten.test(data)) {    
+      show_message("姓名格式错误", "请输入您的真实姓名",false);
+      return false;
+    } else {
+      return true;
+    }
+    return true;
+  }
+  function finish_edit_name() {
+    my_all_hide("edit_name");
+    my_all_show("show_name");
+    var now_name = $('input[name="name"]').val();
+    if (!name_form_check(now_name)) return;
+
+    var data = {
+      data:JSON.stringify({
+        '-c':map.get('C_USERNAME'),
+        '-u':map.get('N_USERNAME'),
+        "-n":now_name
+      })
+    }
+    
+    $.ajax({
+      url:"{{ url_for('ajax_modify_profile') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          map.set('N_NAME', data['C_NAME']);
+          document.getElementById('show_name_text').innerText=map.get('N_NAME');
+          document.getElementById('name_in_title').innerText=map.get('N_NAME');
+          show_message("恭喜您", "你的名字修改成功！", true);
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的修改", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+    
+    
+  }
+
+  
+
+  function edit_mailAddr() {
+    my_all_hide("show_mailAddr");
+    my_all_show("edit_mailAddr");
+    $('input[name="mailAddr"]').val(map.get('N_MAILADDR')).focus();
+  }
+
+  function mailAddr_form_check(data) {
+    //  TODO
+    patten = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(\.[a-zA-Z0-9_-]+)+$/;
+    if (!patten.test(data)) {    
+      show_message("邮箱格式错误", "请输入有效的邮箱",false);
+      return false;
+    } else {
+      return true;
+    }
+    return true;
+  }
+
+  function finish_edit_mailAddr() {
+    my_all_hide("edit_mailAddr");
+    my_all_show("show_mailAddr");
+    var now_mailAddr = $('input[name="mailAddr"]').val();
+    if (!mailAddr_form_check(now_mailAddr)) return;
+
+    var data = {
+      data:JSON.stringify({
+        '-c':map.get('C_USERNAME'),
+        '-u':map.get('N_USERNAME'),
+        "-m":now_mailAddr
+      })
+    }
+
+    $.ajax({
+      url:"{{ url_for('ajax_modify_profile') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          map.set('N_MAILADDR', data['C_MAILADDR']);
+          document.getElementById('show_mailAddr_text').innerText=map.get('N_MAILADDR')
+          show_message("恭喜您", "您的邮箱修改成功！", true);
+          reload_avatar();
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的修改", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+    
+  }
+
+  function edit_privilege() {
+    my_all_hide("show_privilege");
+    my_all_show("edit_privilege");
+    $('input[name="privilege"]').val(map.get('N_PRIVILEGE')).focus();
+  }
+  function privilege_form_check(data){
+    patten = /^\d+$/;
+    if (!patten.test(data)) {    
+      show_message("权限等级格式错误", "请输入0~10的整数",false);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function finish_edit_privilege() {
+    my_all_hide("edit_privilege");
+    my_all_show("show_privilege");
+
+    var now_privilege = $('input[name="privilege"]').val();
+    if (!privilege_form_check(now_privilege)) return;
+
+    var data = {
+      data:JSON.stringify({
+        '-c':map.get('C_USERNAME'),
+        '-u':map.get('N_USERNAME'),
+        "-g":now_privilege
+      })
+    }
+    
+
+    $.ajax({
+      url:"{{ url_for('ajax_modify_profile') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          map.set('N_PRIVILEGE', data['C_PRIVILEGE']);
+          document.getElementById('show_privilege_text').innerText=map.get('N_PRIVILEGE')
+          show_message("恭喜您", "您的权限修改成功！", true);
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的修改，可能由于权限不足", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+    
+  }
+</script>
+{% endblock %}

@@ -6,7 +6,218 @@
 
 {% endblock %} 
 {% block content %}
- <div class="ui text container">
-    <div class='ui button' onclick="$('#modal').modal('show');">不要点我</div>
+<div class="ui text container">
+  <div class="ui segment">
+    <form class="ui form">
+      <div class="two fields">
+        <div class="field">
+          <div class="ui input">
+            <input type="text" placeholder="搜索您想查看的车次编号..." id="trainID_input">
+          </div>
+        </div>
+        <div class="field">
+          <div class="ui small input">
+            <input type="date" class="prompt" id="ticket_date_input">
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="ui two buttons">
+      <button class="ui primary button" onclick="if(search_check()) reload_train()">查询</button>  
+      <div class='or'></div>
+      <button class="ui primary button" onclick="show_add_train_tabel()">添加</button>  
+    </div>
   </div>
+  
+  <div class="ui negative message" id="negative_message">
+    <i class="close icon" onclick="document.getElementById('negative_message').style.display='none'"></i>
+    <div class="header" id="negative_message_header"></div>
+    <p id="negative_message_content"></p>
+  </div>
+  <div class="ui positive message" id="positive_message">
+    <i class="close icon" onclick="document.getElementById('positive_message').style.display='none'"></i>
+    <div class="header" id="positive_message_header"></div>
+    <p id="positive_message_content"></p>
+  </div>
+  <div>
+    <div id="show_train_table">
+      <div class="ui header"><span id="show_trainID"></span> -- <span id="show_type"></span></div>
+      <div class="ui divider"></div>
+      <table class="ui striped table">
+        <thead>
+          <tr>
+            <th>站点</th>
+            <th>到站时间</th>
+            <th>出站时间</th>
+            <th>票价</th>
+            <th>剩余座位</th>
+          </tr>
+        </thead>
+        <tbody id="show_stations">
+          
+        </tbody>
+      </table>
+      <div class="ui one column grid">
+        <div class="column">
+          <button class="ui green left floated button" onclick="release_train(trainID)">发布车次</button>
+          <button class="ui red right floated button" onclick="delete_train(trainID)">删除车次</button>
+        </div>
+      </div>
+    </div>
+    <div id="add_train_table">
+      
+
+      <div class="ui one column grid">
+        <div class="column">
+          <button class="ui left floated button">新增站点</button>
+          <button class="ui right floated button">确认添加</button>
+        </div>
+      </div>
+
+      
+    </div>
+
+  </div>
+</div>
+<script>
+  //document.getElementById('show_train_table').style.display="none";
+  document.getElementById('add_train_table').style.display="none";
+
+  function show_add_train_tabel() {
+    $('#terminal').modal('show');
+    /*
+    document.getElementById('show_train_table').style.display="none";
+    document.getElementById('add_train_table').style.display="";
+    */
+  }
+
+  function search_check() {
+    trainID = document.getElementById('trainID_input').value;
+    time = document.getElementById('ticket_date_input').value;
+    if (trainID == "") {
+      show_message("查询失败", "请输入列车的编号", false);
+      return false;
+    } else if (time == "") {
+      show_message("查询失败", "请输入想要查询的日期", false);
+      return false;
+    }
+    return true;
+  }
+
+  hide_message();
+  function hide_message() {
+    document.getElementById('negative_message').style.display="none";
+    document.getElementById('positive_message').style.display="none";
+  }
+
+  function show_message(header, content, is_positive) {
+    if (is_positive) {
+      document.getElementById('positive_message_header').innerText=header;
+      document.getElementById('positive_message_content').innerText=content;
+      document.getElementById('positive_message').style.display="block";
+      document.getElementById('negative_message').style.display="none";
+    } else {
+      document.getElementById('negative_message_header').innerText=header;
+      document.getElementById('negative_message_content').innerText=content;
+      document.getElementById('negative_message').style.display="block";
+      document.getElementById('positive_message').style.display="none";
+    }
+  }
+
+  function show_show_train_tabel() {
+    document.getElementById('show_train_table').style.display="";
+    document.getElementById('add_train_table').style.display="none";
+    document.getElementById('show_trainID').innerText=trainID;
+    document.getElementById('show_type').innerText=type;
+    var show_stations = document.getElementById('show_stations');
+    show_stations.innerHTML="";
+    for (var i in stations) {
+      var item = stations[i];
+      var row = document.createElement('tr');
+
+      var item_html = '<td>' + item['station'] + '</td><td>'+ item['ARRIVING_TIME']+ '</td><td>' + item['LEAVING_TIME'] +'</td><td>' + item['PRICE'] + '</td><td>'+ item['SEAT'] + '</td>';
+      row.innerHTML = item_html;
+      show_stations.appendChild(row);
+      //show_stations.innerHTML += item_html;
+    }
+  }
+
+  function reload_train() {
+    var data = {
+      data:JSON.stringify({
+        '-i':trainID,
+        '-d':time.substring(5),
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_query_train') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          show_message("查询成功", "你现在可以查看车次的信息了！", true);
+          trainID = data['trainID'];
+          type = data['type'];
+          stations = data['stations'];
+          show_show_train_tabel();
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的查询", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+  }
+
+  function release_train(trainID) {
+    var data = {
+      data:JSON.stringify({
+        '-i':trainID,
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_release_train') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          show_message("发布成功", "该车次已经成功发布，现在可以发售车票了！", true);
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的请求，可能是该车次已经发布", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+  }
+
+  function delete_train(trainID) {
+    var data = {
+      data:JSON.stringify({
+        '-i':trainID,
+      })
+    }
+    $.ajax({
+      url:"{{ url_for('ajax_delete_train') }}",
+      type:"post",
+      data:data,
+      dataType: 'json',
+      success:function(data){
+        if (data["result"] == "success") {
+          show_message("删除成功", "该车次已经成功删除", true);
+        } else {
+          show_message("出现了问题", "服务器拒绝了你的请求，可能是该车次已经发布", false);
+        }
+      },
+      error:function(e){
+        show_message("出现了问题", "未连接到服务器", false);
+      }
+    })
+  }
+
+</script>
 {% endblock %}
