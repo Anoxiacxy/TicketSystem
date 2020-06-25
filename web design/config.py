@@ -1,1 +1,0 @@
-SECRET_KEY = 'TickeySystem2020'
