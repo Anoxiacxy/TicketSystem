@@ -5,6 +5,8 @@
 #include "ticket_train_related.hpp"
 #include "ticket_user_train_related.hpp"
 #include <iostream> 
+#include <sstream>
+#include <cstring>
 #include <fstream> 
 
 namespace sjtu{
@@ -27,6 +29,7 @@ class Interpreter{
     	outfile.close();
     	infile.open("data.txt");
     	string<15>tmp;
+		std::stringstream sout;
     	while(infile >> tmp){
     	    if(tmp == string<10>("add_user")){
     	    	string<20> username1;
@@ -58,10 +61,10 @@ class Interpreter{
 					}
 				}
 				if(username1 == string<20>("cur")){
-					std::cout << U.add_user(username2, password, name, mailAddr, privilege) << std::endl;
+					sout << U.add_user(username2, password, name, mailAddr, privilege) << std::endl;
 				}
 				else{
-					std::cout << U.add_user(username1, username2, password, name, mailAddr, privilege) << std::endl;
+					sout << U.add_user(username1, username2, password, name, mailAddr, privilege) << std::endl;
 				}
 		    } 
 		    else if(tmp == string<10>("login")){
@@ -77,7 +80,7 @@ class Interpreter{
     	    			infile >> password;
 					}
 				}
-				std::cout << U.login(username, password) << std::endl;
+				sout << U.login(username, password) << std::endl;
 		    }
 		    else if(tmp == string<10>("logout")){
 		    	string<20> username;
@@ -88,7 +91,7 @@ class Interpreter{
     	    			infile >> username;
 					}
 				}
-				std::cout << U.logout(username) << std::endl;
+				sout << U.logout(username) << std::endl;
 		    }
 		    else if(tmp == string<15>("query_profile")){
 		    	string<20> username1;
@@ -104,9 +107,9 @@ class Interpreter{
 					}
 				}
 				pair<bool, pair<USERNAME, user> > Tmp = U.query_profile(username1, username2);
-				if(Tmp.first == false) std::cout << -1 << std::endl;
+				if(Tmp.first == false) sout << -1 << std::endl;
 				else{
-					std::cout << username2 << " " << Tmp.second.second << std::endl;
+					sout << username2 << " " << Tmp.second.second << std::endl;
 				}
 		    }
 		    else if(tmp == string<15>("modify_profile")){
@@ -139,9 +142,9 @@ class Interpreter{
 					}
 				}
 				pair<bool, pair<USERNAME, user> > Tmp = U.modify_profile(username1, username2, password, name, mailAddr, privilege);
-				if(Tmp.first == false) std::cout << -1 << std::endl;
+				if(Tmp.first == false) sout << -1 << std::endl;
 				else{
-					std::cout << username2 << " " << Tmp.second.second << std::endl;
+					sout << username2 << " " << Tmp.second.second << std::endl;
 				}
 		    }
 		    else if(tmp == string<10>("add_train")){
@@ -176,8 +179,8 @@ class Interpreter{
     	    		if(op == string<3>("-s")){
     	    			infile.get();
     	    			for(int i = 0; i < stationNum - 1; ++i){
-    	    				char Tmp[21];
-    	    				infile.getline(Tmp, 21, '|');
+    	    				char Tmp[33];
+    	    				infile.getline(Tmp, 33, '|');
     	    				stations[i] = string<20>(Tmp);
 						}
 						infile >> stations[stationNum - 1];
@@ -223,7 +226,7 @@ class Interpreter{
 					}
 				}
 				int tmp = T.add_train(trainID, stationNum, stations, prices, startTime, travelTimes, stopoverTimes, saleDate_from, saleDate_to, type, seatNum);
-				std::cout << tmp << std::endl;
+				sout << tmp << std::endl;
 		    } 
 		    else if(tmp == string<15>("release_train")){
 		    	string<20> trainID;
@@ -239,7 +242,7 @@ class Interpreter{
 					train tmp = T.at(trainID);
 					TT.add(tmp, trainID, T);
 				}
-				std::cout << data << std::endl;
+				sout << data << std::endl;
 		    }
 		    else if(tmp == string<15>("query_train")){
 		    	string<20> trainID;
@@ -255,12 +258,12 @@ class Interpreter{
 					}
 				}
 				pair<bool, pair<string<20>, train> > Tmp = T.query_train(trainID);
-				if(Tmp.first == false) std::cout << -1 << std::endl;
+				if(Tmp.first == false) sout << -1 << std::endl;
 				else{
-					if(cmp_date(Tmp.second.second.get_saleDate_from(), date) == 1 || cmp_date(Tmp.second.second.get_saleDate_to(), date) == -1) std::cout << -1 << std::endl;
+					if(cmp_date(Tmp.second.second.get_saleDate_from(), date) == 1 || cmp_date(Tmp.second.second.get_saleDate_to(), date) == -1) sout << -1 << std::endl;
 					else{
-						std::cout << trainID << " ";
-		                std::cout << Tmp.second.second.type << std::endl;
+						sout << trainID << " ";
+		                sout << Tmp.second.second.type << std::endl;
 			            int date_gap = 0;
 			            int date_fix = 0;
 			            string<5> arriving_time = Tmp.second.second.startTime;
@@ -269,7 +272,7 @@ class Interpreter{
 			            string<5> leaving_date = date;
 			            int price = 0;
 			            int date_interval = minus_date(Tmp.second.second.saleDate_from, date);
-			            std::cout << T.Station1[Tmp.second.second.pos1] << " xx-xx" << " xx:xx" << " -> " << date << " " << leaving_time << " " << price << " " << T.Seat1[Tmp.second.second.pos2 + date_interval * (Tmp.second.second.stationNum - 1)] << std::endl; 
+			            sout << T.Station1[Tmp.second.second.pos1] << " xx-xx" << " xx:xx" << " -> " << date << " " << leaving_time << " " << price << " " << T.Seat1[Tmp.second.second.pos2 + date_interval * (Tmp.second.second.stationNum - 1)] << std::endl; 
 			            price += T.Price1[Tmp.second.second.pos1 + 1];
 			            pair<int, string<5> > tmpTime1 = add_time(leaving_time, T.Time1[Tmp.second.second.pos1 + 1]);
 			            date_fix += tmpTime1.first;
@@ -280,7 +283,7 @@ class Interpreter{
 			            arriving_time = tmpTime1.second;
 			            leaving_time = tmpTime3.second;
 			            for(int i = 1; i < Tmp.second.second.stationNum - 1; ++i){
-				            std::cout << T.Station1[Tmp.second.second.pos1 + i] << " " << arriving_date << " " << arriving_time << " -> " << leaving_date << " " << leaving_time << " " << price << " " << T.Seat1[Tmp.second.second.pos2 + date_interval * (Tmp.second.second.stationNum - 1) + i] << std::endl;
+				            sout << T.Station1[Tmp.second.second.pos1 + i] << " " << arriving_date << " " << arriving_time << " -> " << leaving_date << " " << leaving_time << " " << price << " " << T.Seat1[Tmp.second.second.pos2 + date_interval * (Tmp.second.second.stationNum - 1) + i] << std::endl;
 			                price += T.Price1[Tmp.second.second.pos1 + i + 1];
 			                pair<int, string<5> > tmpTime = add_time(leaving_time, T.Time1[Tmp.second.second.pos1 + i + 1]);
 				            date_fix += tmpTime.first;
@@ -291,7 +294,7 @@ class Interpreter{
 				            arriving_time = tmpTime.second;
 				            leaving_time = tmpTime2.second;
 			            }
-			            std::cout << T.Station1[Tmp.second.second.pos1 + Tmp.second.second.stationNum - 1] << " " << arriving_date << " " << arriving_time << " -> xx-xx" << " xx:xx " << price <<  " x\n";
+			            sout << T.Station1[Tmp.second.second.pos1 + Tmp.second.second.stationNum - 1] << " " << arriving_date << " " << arriving_time << " -> xx-xx" << " xx:xx " << price <<  " x\n";
 					}
 				}
 		    }
@@ -304,7 +307,7 @@ class Interpreter{
     	    			infile >> trainID;
 					}
 				}
-				std::cout << T.delete_train(trainID) << std::endl;
+				sout << T.delete_train(trainID) << std::endl;
 		    }
 		    else if(tmp == string<15>("query_ticket")){
 		    	string<5> date;
@@ -330,30 +333,30 @@ class Interpreter{
 				if(cmp == string<5>("time")){
 					priority_queue<ticket_train, cmp_time> res = TT.query_ticket_time(station1, station2, date);
 					int num = res.size();
-					std::cout << num << std::endl;
+					sout << num << std::endl;
 					for(int i = 0; i < num; ++i){
 						ticket_train ans = res.top();
 						res.pop();
 						bool flag = T.release(ans.get_trainID());
 						if(flag){
-							ans.print();
+							ans.print(sout);
 						    int seat = T.query_seat(ans.get_trainID(), ans.get_start_date(), ans.get_num1(), ans.get_num2()); 
-						    std::cout << seat << std::endl;
+						    sout << seat << std::endl;
 						}
 					}
 				}
 				else if(cmp == string<5>("cost")){
 					priority_queue<ticket_train, cmp_price> res = TT.query_ticket_price(station1, station2, date);
 					int num = res.size();
-					std::cout << num << std::endl;
+					sout << num << std::endl;
 					for(int i = 0; i < num; ++i){
 						ticket_train ans = res.top();
 						res.pop();
 						bool flag = T.release(ans.get_trainID());
 						if(flag){
-							ans.print();
+							ans.print(sout);
 						    int seat = T.query_seat(ans.get_trainID(), ans.get_start_date(), ans.get_num1(), ans.get_num2());
-						    std::cout << seat << std::endl;
+						    sout << seat << std::endl;
 						}
 					}
 				}
@@ -382,28 +385,28 @@ class Interpreter{
 				if(cmp == string<5>("time")){
 					pair<ticket_train, ticket_train> ans = TT.query_transfer_time(station1, station2, date, T); 
 					if (ans.first == ticket_train()){
-						std::cout << 0 << std::endl;
+						sout << 0 << std::endl;
 						continue;
 					}
-					ans.first.print();
+					ans.first.print(sout);
 					int seat1 = T.query_seat(ans.first.get_trainID(), ans.first.get_start_date(), ans.first.get_num1(), ans.first.get_num2());
-					std::cout << seat1 << std::endl;
-					ans.second.print();
+					sout << seat1 << std::endl;
+					ans.second.print(sout);
 					int seat2 = T.query_seat(ans.second.get_trainID(), ans.second.get_start_date(), ans.second.get_num1(), ans.second.get_num2());
-					std::cout << seat2 << std::endl;
+					sout << seat2 << std::endl;
 				}
 				else if(cmp == string<5>("cost")){
 					pair<ticket_train, ticket_train> ans = TT.query_transfer_price(station1, station2, date, T); 
 					if (ans.first == ticket_train()){
-						std::cout << 0 << std::endl;
+						sout << 0 << std::endl;
 						continue;
 					}
-					ans.first.print();
+					ans.first.print(sout);
 					int seat1 = T.query_seat(ans.first.get_trainID(), ans.first.get_start_date(), ans.first.get_num1(), ans.first.get_num2());
-					std::cout << seat1 << std::endl;
-					ans.second.print();
+					sout << seat1 << std::endl;
+					ans.second.print(sout);
 					int seat2 = T.query_seat(ans.second.get_trainID(), ans.second.get_start_date(), ans.second.get_num1(), ans.second.get_num2());
-					std::cout << seat2 << std::endl;
+					sout << seat2 << std::endl;
 				} 
 		    }
 		    else if(tmp == string<15>("buy_ticket")){
@@ -440,20 +443,20 @@ class Interpreter{
 					}
 				}
 				bool log = U.query_log(username);
-				if(!log) std::cout << -1 << std::endl;
+				if(!log) sout << -1 << std::endl;
 				else{
 					pair<int, route> tmpdata = T.query_ticket(trainID, date, leaving_station, arriving_station, ticketNum);
 					int flag = tmpdata.first;
-					if(flag == -1) std::cout << -1 << std::endl;
-					else if(flag == 0 && queue == string<5>("false")) std::cout << -1 << std::endl;
+					if(flag == -1) sout << -1 << std::endl;
+					else if(flag == 0 && queue == string<5>("false")) sout << -1 << std::endl;
 					else if(flag == 0 && queue == string<5>("true")){
 						int data = TUT.add_ticket(username, trainID, date, leaving_station, arriving_station, ticketNum, tmpdata.second.leaving_time, tmpdata.second.arriving_time, tmpdata.second.date_fix, tmpdata.second.date_gap, string<8>("pending"), tmpdata.second.price, tmpdata.second.leaving_station, tmpdata.second.arriving_station);
 						TUT.add_queue(username, data, trainID, date, leaving_station, arriving_station, ticketNum, tmpdata.second.leaving_time, tmpdata.second.arriving_time, tmpdata.second.date_fix, tmpdata.second.date_gap, string<8>("pending"), tmpdata.second.price, tmpdata.second.leaving_station, tmpdata.second.arriving_station);
-						std::cout << "queue" << std::endl;
+						sout << "queue" << std::endl;
 					}
 					else if(flag == 1){
 					    TUT.add_ticket(username, trainID, date, leaving_station, arriving_station, ticketNum, tmpdata.second.leaving_time, tmpdata.second.arriving_time, tmpdata.second.date_fix, tmpdata.second.date_gap, string<8>("success"), tmpdata.second.price, tmpdata.second.leaving_station, tmpdata.second.arriving_station);
-						std::cout << tmpdata.second.price * ticketNum << std::endl;
+						sout << tmpdata.second.price * ticketNum << std::endl;
 					}
 				}
 		    }
@@ -467,9 +470,9 @@ class Interpreter{
 					}
 				}
 				bool log = U.query_log(username);
-				if(!log) std::cout << -1 << std::endl;
+				if(!log) sout << -1 << std::endl;
 				else{
-					TUT.query_order(username);
+					TUT.query_order(username, sout);
 				}
 		    }
 		    else if(tmp == string<15>("refund_ticket")){
@@ -486,10 +489,10 @@ class Interpreter{
 					}
 				}
 				bool log = U.query_log(username);
-				if(!log) std::cout << -1 << std::endl;
+				if(!log) sout << -1 << std::endl;
 				else{
 				    int op = TUT.refund_ticket(username, n, T);
-		    	    std::cout << op << std::endl;	
+		    	    sout << op << std::endl;	
 				}
 		    }
 		    else if(tmp == string<10>("clean")){
@@ -501,17 +504,20 @@ class Interpreter{
 		    	new(&T) train_related();
 		    	new(&TT) ticket_train_related();
 		    	new(&TUT) ticket_user_train_related();
-		    	std::cout << 0 << std::endl;
+		    	sout << 0 << std::endl;
 			}
 			else if(tmp == string<5>("exit")){
 				U.exit();
-				std::cout << "bye" << std::endl;
-				std::cout.flush();
+				sout << "bye" << std::endl;
+				sout.flush();
 			}
 			else if(infile.get() != infile.eof()){
 				continue;
 			}
 	    }
+		infile.close();
+		//std::cerr << "sout.str().c_str() = " << sout.str().c_str() << std::endl;
+		memcpy(buff, sout.str().c_str(), strlen(sout.str().c_str()) + 1);
     }
 };
 }

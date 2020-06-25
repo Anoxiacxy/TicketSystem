@@ -17,7 +17,10 @@ namespace sjtu{
 			int success = usertree.count(Username);
 	    	if(success == 1) return -1;
 	    	else{
-	    		usertree.insert(Username, user(Password, Name, MailAddr, Privilege));
+				if (usertree.empty())
+	    			usertree.insert(Username, user(Password, Name, MailAddr, 10));
+				else 
+					usertree.insert(Username, user(Password, Name, MailAddr, Privilege));
 	    		return 0;
 			}
 		} 

@@ -51,6 +51,21 @@ namespace sjtu{
 				    }
 				}
 			}
+			inline int query_order(const string<20> &username, std::ostream &out){
+				int TMP1 = order_num.at(username);
+				if(TMP1 == 0){
+					out << 0 << std::endl;
+				}
+				else{
+					out << TMP1 << std::endl;
+					auto TMP = ticket_user_train_tree.lower_bound(user_order(TMP1 - 1, username));
+				    for(int i = 0; i < TMP1; ++i){
+				    	ticket_user_train A = *(TMP);
+				    	A.print(out);
+					    --TMP;
+				    }
+				}
+			}
 			inline int refund_ticket(const string<20> &username, int num, train_related &T){
 				int TMP = order_num.at(username);
 				if(num > TMP) return -1;

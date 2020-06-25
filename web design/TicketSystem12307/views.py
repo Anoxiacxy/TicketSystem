@@ -1,16 +1,11 @@
+from TicketSystem12307 import *
+
 @app.route('/')
 def index():
     argv={}
     for key in session:
         argv[key] = session[key]
     return render_template('index.html', argv=argv)
-
-def communicate(command):
-    client = Client()
-    print("send to server >>> " + command)
-    msg = client.communicate(command)
-    print("recv from server << " + msg)
-    return msg
 
 @app.route('/logout')
 def logout():

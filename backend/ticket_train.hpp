@@ -89,6 +89,9 @@ namespace sjtu{
 		inline void print(){
 			std::cout << trainID << " " << leaving_station << " " << leaving_date << " " << leaving_time << " -> " << arriving_station << " " << arriving_date << " " << arriving_time << " " << price << " ";
 		}
+		inline void print(std::ostream &out){
+			out << trainID << " " << leaving_station << " " << leaving_date << " " << leaving_time << " -> " << arriving_station << " " << arriving_date << " " << arriving_time << " " << price << " ";
+		}
 	};
 	struct cmp_time{
 		bool operator() (const ticket_train &tmp1, const ticket_train &tmp2){

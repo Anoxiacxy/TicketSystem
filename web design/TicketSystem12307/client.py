@@ -1,7 +1,7 @@
 import socket
 
 class Client:
-    def __init__(self, HOST = "localhost", PORT = 12306, MAXBUFF = 16384):
+    def __init__(self, HOST = "111.229.160.139", PORT = 12306, MAXBUFF = 16384):
         self.HOST = HOST 
         self.PORT = PORT 
         self.ADDRESS = (self.HOST, self.PORT)
@@ -18,4 +18,3 @@ class Client:
                     break
                 total_data.append(data)
         return ''.join(total_data)
-

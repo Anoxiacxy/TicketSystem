@@ -45,6 +45,9 @@ namespace sjtu{
 		void print(){
 			std::cout << "[" << status << "] " << trainID << " " << leaving_station << " " << date << " " << leaving_time << " -> " << arriving_station << " " << add_date(date, date_gap) << " " << arriving_time << " " << price << " " << ticket_num << std::endl;
 		}
+		void print(std::ostream &out){
+			out << "[" << status << "] " << trainID << " " << leaving_station << " " << date << " " << leaving_time << " -> " << arriving_station << " " << add_date(date, date_gap) << " " << arriving_time << " " << price << " " << ticket_num << std::endl;
+		}
 		ticket_user_train &operator = (const ticket_user_train &other){
 			trainID = other.trainID;
 			date = other.date;
@@ -95,7 +98,7 @@ namespace sjtu{
 		inline string<5> get_startdate(){
 			return minus_date(date, date_fix);
 		}
-	};//username×÷ÎªË÷Òý²»°üº¬ÔÚ¸ÃÀàÖÐ 
+	};//usernameï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ú¸ï¿½ï¿½ï¿½ï¿½ï¿½ 
 	class queue_index{
 	public:
 		string<20> station; // trainID

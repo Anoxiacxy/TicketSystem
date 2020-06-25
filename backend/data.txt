@@ -1,0 +1,2 @@
+add_user -c cur -u Anoxiacxy -p 100000 -n 陈雪阳 -m 1171049519@qq.com -g 10
+login -u Anoxiacxy -p 100000

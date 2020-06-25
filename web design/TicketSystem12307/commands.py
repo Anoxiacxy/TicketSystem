@@ -1,3 +1,5 @@
+from TicketSystem12307 import *
+
 @app.route("/ajax_terminal", methods=["POST"])
 def ajax_terminal():
     data = json.loads(request.form.get('data'))
@@ -14,16 +16,20 @@ def ajax_terminal():
 
 @app.route("/ajax_add_user", methods=["POST"])
 def ajax_add_user():
+    print(19)
     data = json.loads(request.form.get('data'))
+    print(21)
     try:
+        print(23)
         command = "add_user"
         for opt in ["-c", "-u", "-p", "-n", "-m", "-g"]:
             if opt in data:
                 command += " " + opt + " " + data[opt]
             else:
                 return jsonify({ "result" : "error" })    
-        
+        print(29)
         result = communicate(command).split()
+        print(30)
         if len(result) == 1 and result[0] == "0":
             return jsonify({
                 "result" : "success"
