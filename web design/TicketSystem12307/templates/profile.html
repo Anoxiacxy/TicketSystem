@@ -218,8 +218,7 @@
     my_all_show("edit_password");
     $('input[name="password"]').focus();
   }
-  function password_form_check() {
-    
+  function password_form_check(data) {
     patten = /^[a-zA-Z0-9_-]{6,30}$/;
     if (!patten.test(data)) {    
       show_message("密码格式错误", "您的密码至少需要6个字符，最长不超过30个字符，且仅包含字母数字和下划线",false);

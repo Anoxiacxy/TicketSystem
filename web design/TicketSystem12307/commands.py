@@ -16,20 +16,15 @@ def ajax_terminal():
 
 @app.route("/ajax_add_user", methods=["POST"])
 def ajax_add_user():
-    print(19)
     data = json.loads(request.form.get('data'))
-    print(21)
     try:
-        print(23)
         command = "add_user"
         for opt in ["-c", "-u", "-p", "-n", "-m", "-g"]:
             if opt in data:
                 command += " " + opt + " " + data[opt]
             else:
                 return jsonify({ "result" : "error" })    
-        print(29)
         result = communicate(command).split()
-        print(30)
         if len(result) == 1 and result[0] == "0":
             return jsonify({
                 "result" : "success"
@@ -110,8 +105,6 @@ def ajax_query_profile():
 def ajax_modify_profile():
     data = json.loads(request.form.get('data'))
     try:
-        command = "modify_profile" + " -c " + data['-c'] + " -u " + data['-u']
-
         for opt in ["-c", "-u"]:
             if opt in data:
                 command += " " + opt + " " + data[opt]
@@ -324,28 +317,17 @@ def ajax_query_transfer():
 
 @app.route("/ajax_buy_ticket", methods=["POST"])
 def ajax_buy_ticket():
-    print("1")
     data = json.loads(request.form.get('data'))
-    print("2")
     try:
-        print("3")
         command = "buy_ticket"
-        print("4")
         for opt in ["-u", "-i", "-d", "-n", "-f", "-t"]:
-            print("5" + opt)
             if opt in data:
-                print("50" + opt)
-                print(data[opt])
                 command += " " + opt + " " + data[opt]
-                print("5000" + opt)
             else:
-                print("51" + opt)
                 return jsonify({ "result" : "error" })
-        print("5")
         for opt in ["-q"]:
             if opt in data:
                 command += " " + opt + " " + data[opt]
-        print("6")
         result = communicate(command).split()
         if result[0] == "-1":
             return jsonify({ "result" : "error" })

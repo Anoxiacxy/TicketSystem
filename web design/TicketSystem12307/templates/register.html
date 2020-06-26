@@ -114,7 +114,6 @@
       success:function(data){
         if (data["result"] == "success") {
           show_message("添加成功", "你现在可以查看该用户的信息了", true);
-          
           reload_avatar();
         } else {
           show_message("出现了问题", "可能是由于账户发生了冲突，请尝试更换您的账户名", false);
